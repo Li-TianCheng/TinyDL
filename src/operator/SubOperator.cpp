@@ -9,26 +9,26 @@ SubOperator::SubOperator(const Tensor &tensor1, const Tensor &tensor2) : Operato
 }
 
 Tensor SubOperator::operator()() {
-	shared_ptr<Matrix<double, Dynamic, Dynamic>> value = nullptr;
+	shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value = nullptr;
 	if (tensor1.isConstant) {
-		Matrix<double, Dynamic, Dynamic> m(*tensor2.value);
+		Matrix<double, Dynamic, Dynamic, RowMajor> m(*tensor2.value);
 		m.setOnes();
-		value = std::make_shared<Matrix<double, Dynamic, Dynamic>>(tensor1.constValue*m - *tensor2.value);
+		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(tensor1.constValue*m - *tensor2.value);
 	} else if (tensor2.isConstant) {
 		Matrix<double, Dynamic, Dynamic> m(*tensor1.value);
 		m.setOnes();
-		value = std::make_shared<Matrix<double, Dynamic, Dynamic>>(*tensor1.value - tensor2.constValue*m);
+		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1.value - tensor2.constValue*m);
 	} else {
-		value = std::make_shared<Matrix<double, Dynamic, Dynamic>>(*tensor1.value-*tensor2.value);
+		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1.value-*tensor2.value);
 	}
 	return Tensor(value, shared_from_this());
 }
 
 void SubOperator::grad(Tensor& result) {
 	if (!tensor1.isConstant) {
-		*tensor1._grad += (*result._grad).transpose();
+		*tensor1.gradient += *result.gradient;
 	}
 	if (!tensor2.isConstant) {
-		*tensor2._grad += (-*result._grad).transpose();
+		*tensor2.gradient += -*result.gradient;
 	}
 }

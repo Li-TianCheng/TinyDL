@@ -5,7 +5,6 @@
 #ifndef TINYDL_ADDOPERATOR_H
 #define TINYDL_ADDOPERATOR_H
 
-#include <Tensor.h>
 #include "operator/Operator.h"
 
 class AddOperator : public Operator {

@@ -10,37 +10,44 @@
 #include "operator/DivOperator.h"
 #include "operator/PowOperator.h"
 #include "operator/LogOperator.h"
+#include "operator/ResizeOperator.h"
+#include "operator/TransposeOperator.h"
+#include "operator/DotOperator.h"
 
-Tensor::Tensor(double value) : op(nullptr), value(nullptr), _grad(nullptr), constValue(value), isConstant(true), rowNum(0), colNum(0) {
+Tensor::Tensor(double value) : op(nullptr), value(nullptr), gradient(nullptr), constValue(value), isConstant(true) {
 
 }
 
-Tensor::Tensor(shared_ptr<Matrix<double, Dynamic, Dynamic>> value, shared_ptr<Operator> op) : value(value), op(op), isConstant(false), constValue(0), rowNum(value->rows()), colNum(value->cols())  {
-	_grad = std::make_shared<Matrix<double, Dynamic, Dynamic>>(*value);
-	_grad->setZero();
+Tensor::Tensor(shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value, shared_ptr<Operator> op) : value(value), op(op), isConstant(false), constValue(0) {
+	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*value);
+	gradient->setZero();
 }
 
-Matrix<double, Dynamic, Dynamic> Tensor::operator*() {
+double Tensor::operator()(int row, int col) {
+	return (*value)(row, col);
+}
+
+std::ostream& operator<<(std::ostream &out, Tensor& t) {
+	out << *t.value;
+	return out;
+}
+
+void Tensor::clearGradient() {
+	gradient->setZero();
+}
+
+Matrix<double, Dynamic, Dynamic, RowMajor> Tensor::grad() {
 	if (isConstant) {
-		auto m = Matrix<double, Dynamic, Dynamic>(1, 1);
-		m << constValue;
-		return m;
-	}
-	return *value;
-}
-
-Matrix<double, Dynamic, Dynamic> Tensor::grad() {
-	if (isConstant) {
-		auto m = Matrix<double, Dynamic, Dynamic>(1, 1);
+		auto m = Matrix<double, Dynamic, Dynamic, RowMajor>(1, 1);
 		m << 0;
 		return m;
 	}
-	return *_grad;
+	return *gradient;
 }
 
 void Tensor::backward() {
-	if (!isConstant && _grad->size() == 1) {
-		_grad->setIdentity();
+	if (!isConstant && gradient->size() == 1) {
+		gradient->setIdentity();
 		_backward();
 	}
 }
@@ -121,4 +128,16 @@ Tensor Tensor::pow(double t) {
 
 Tensor Tensor::exp() {
 	return (*shared_ptr<Operator>(new PowOperator(1.0, *this)))();
+}
+
+Tensor Tensor::resize(int rowNum, int colNum, bool isNew) {
+	return (*shared_ptr<Operator>(new ResizeOperator(*this, rowNum, colNum, isNew)))();
+}
+
+Tensor Tensor::transpose(bool isNew) {
+	return (*shared_ptr<Operator>(new TransposeOperator(*this, isNew)))();
+}
+
+Tensor Tensor::dot(const Tensor &t) {
+	return (*shared_ptr<Operator>(new DotOperator(*this, t)))();
 }
