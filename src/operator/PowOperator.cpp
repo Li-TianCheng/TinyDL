@@ -19,7 +19,7 @@ Tensor PowOperator::operator()() {
 	return Tensor(value, shared_from_this());
 }
 
-void PowOperator::grad(Tensor& result) {
+void PowOperator::backward(Tensor& result) {
 	if (tensor1.isConstant) {
 		*tensor2.gradient += ((*tensor2.value).array().exp() * (*result.gradient).array()).matrix();
 	}

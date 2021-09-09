@@ -11,7 +11,7 @@ class ResizeOperator : public Operator {
 public:
 	ResizeOperator(const Tensor& tensor1, int rowNum, int colNum, bool isNew);
 	Tensor operator()() override;
-	void grad(Tensor& result) override;
+	void backward(Tensor& result) override;
 private:
 	bool isNew;
 	int rowNum;

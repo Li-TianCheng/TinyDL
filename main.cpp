@@ -1,22 +1,39 @@
 #include <iostream>
 #include "Tensor.h"
+#include "model/Model.h"
+#include "model/Linear.h"
 
 using namespace std;
 
+class Example : public Model {
+public:
+	Tensor forward(Tensor &input) override {
+		auto out = fc1(input);
+		out = fc2(out);
+		out = fc3(out);
+		return out;
+	}
+private:
+	Linear fc1 = Linear(*this, 1, 400);
+	Linear fc2 = Linear(*this, 400, 200);
+	Linear fc3 = Linear(*this, 200, 1);
+};
+
 int main() {
-	Matrix<double, 1, 2, RowMajor> a;
-	Matrix<double, -1, -1, RowMajor> b;
-	b.resize(2, 1);
-	a << 1,2;
-	b << 2,1;
-	Tensor t1(a);
-	Tensor t2(b);
-	Tensor t3 = t1.log(2)*t2.log(2);
-//	cout << a << endl;
-//	cout << b << endl;
-	cout << t3 << endl;
-	t3.backward();
-	cout << t1.grad() << endl;
-	cout << t2.grad() << endl;
+	Eigen::initParallel();
+	Tensor t(1, 1);
+	t.setRandom();
+	cout << "t: " << t << endl;
+	Example e;
+
+	for (int i = 0; i < 100; i++) {
+		Tensor out = e(t);
+		cout << "out: " << out << endl;
+		out.backward();
+		for (auto& j : e.parameters) {
+			*j -= j->grad() * 0.01;
+			j->clearGradient();
+		}
+	}
     return 0;
 }

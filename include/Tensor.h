@@ -20,6 +20,7 @@ class Operator;
 class Tensor {
 public:
 	Tensor(double value);
+	Tensor(int rowNum, int colNum);
 	template<int rowNum, int colNum>
 	Tensor(Matrix<double, rowNum, colNum, RowMajor> value);
 	Tensor(const Tensor& t) = default;
@@ -30,7 +31,14 @@ public:
 	double operator()(int row, int col);
 	void backward();
 	void clearGradient();
-	Matrix<double, Dynamic, Dynamic, RowMajor> grad();
+	void setZero();
+	void setOnes();
+	void setIdentity();
+	void setRandom();
+	int row();
+	int col();
+	Tensor copy();
+	Tensor grad();
 	Tensor operator+(const Tensor& t);
 	Tensor& operator+=(const Tensor& t);
 	Tensor& operator++();
@@ -50,7 +58,7 @@ public:
 	Tensor transpose(bool isNew=false);
 	Tensor dot(const Tensor& t);
 private:
-	friend std::ostream& operator<<(std::ostream &out, Tensor& t);
+	friend std::ostream& operator<<(std::ostream &out, const Tensor& t);
 	friend class Operator;
 	friend class AddOperator;
 	friend class SubOperator;
@@ -79,6 +87,6 @@ Tensor::Tensor(Matrix<double, rowNum, colNum, RowMajor> value) : op(nullptr), is
 	gradient->setZero();
 }
 
-std::ostream& operator<<(std::ostream &out, Tensor& t);
+std::ostream& operator<<(std::ostream &out, const Tensor& t);
 
 #endif //TINYDL_TENSOR_H

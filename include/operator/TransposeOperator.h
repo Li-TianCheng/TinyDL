@@ -11,7 +11,7 @@ class TransposeOperator : public Operator {
 public:
 	TransposeOperator(const Tensor& tensor1, bool isNew);
 	Tensor operator()() override;
-	void grad(Tensor& result) override;
+	void backward(Tensor& result) override;
 private:
 	bool isNew;
 };

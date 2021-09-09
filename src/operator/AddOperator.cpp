@@ -24,7 +24,7 @@ Tensor AddOperator::operator()() {
 	return Tensor(value, shared_from_this());
 }
 
-void AddOperator::grad(Tensor& result) {
+void AddOperator::backward(Tensor& result) {
 	if (!tensor1.isConstant) {
 		*tensor1.gradient += *result.gradient;
 	}

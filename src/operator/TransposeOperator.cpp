@@ -13,7 +13,7 @@ Tensor TransposeOperator::operator()() {
 	return Tensor(value, shared_from_this());
 }
 
-void TransposeOperator::grad(Tensor &result) {
+void TransposeOperator::backward(Tensor &result) {
 	if (!isNew) {
 		*tensor1.gradient += (*result.gradient).transpose();
 	}

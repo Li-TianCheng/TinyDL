@@ -13,7 +13,7 @@ Tensor DotOperator::operator()() {
 	return Tensor(value, shared_from_this());
 }
 
-void DotOperator::grad(Tensor &result) {
+void DotOperator::backward(Tensor &result) {
 	*tensor1.gradient += ((*tensor2.value).array() * (*result.gradient).array()).matrix();
 	*tensor2.gradient += ((*tensor1.value).array() * (*result.gradient).array()).matrix();
 }

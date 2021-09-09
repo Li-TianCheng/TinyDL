@@ -11,7 +11,7 @@ class AddOperator : public Operator {
 public:
 	AddOperator(const Tensor& tensor1, const Tensor& tensor2);
 	Tensor operator()() override;
-	void grad(Tensor& result) override;
+	void backward(Tensor& result) override;
 };
 
 #endif //TINYDL_ADDOPERATOR_H

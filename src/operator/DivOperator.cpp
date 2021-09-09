@@ -19,7 +19,7 @@ Tensor DivOperator::operator()() {
 	return Tensor(value, shared_from_this());
 }
 
-void DivOperator::grad(Tensor& result) {
+void DivOperator::backward(Tensor& result) {
 	if (tensor1.isConstant) {
 		*tensor2.gradient += -((*tensor2.value).array().pow(-2) * (*result.gradient).array()).matrix() * tensor1.constValue;
 	}

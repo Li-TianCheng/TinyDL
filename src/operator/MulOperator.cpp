@@ -20,7 +20,7 @@ Tensor MulOperator::operator()() {
 	return Tensor(value, shared_from_this());
 }
 
-void MulOperator::grad(Tensor& result) {
+void MulOperator::backward(Tensor& result) {
 	if (!tensor1.isConstant) {
 		if (tensor2.isConstant) {
 			*tensor1.gradient += tensor2.constValue * *result.gradient;

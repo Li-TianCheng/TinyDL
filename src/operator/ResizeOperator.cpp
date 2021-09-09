@@ -14,7 +14,7 @@ Tensor ResizeOperator::operator()() {
 	return Tensor(value, shared_from_this());
 }
 
-void ResizeOperator::grad(Tensor &result) {
+void ResizeOperator::backward(Tensor &result) {
 	if (!isNew) {
 		result.gradient->resize(tensor1.gradient->rows(), tensor1.gradient->cols());
 		*tensor1.gradient += *result.gradient;

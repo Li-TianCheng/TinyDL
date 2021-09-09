@@ -11,7 +11,7 @@ class DivOperator : public Operator {
 public:
 	DivOperator(const Tensor& tensor1, const Tensor& tensor2);
 	Tensor operator()() override;
-	void grad(Tensor& result) override;
+	void backward(Tensor& result) override;
 };
 
 

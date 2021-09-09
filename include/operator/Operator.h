@@ -16,7 +16,8 @@ public:
 	Operator& operator=(const Operator& op) = delete;
 	Operator& operator=(Operator&& op) = delete;
 	virtual Tensor operator()() = 0;
-	virtual void grad(Tensor& result) = 0;
+	virtual void backward(Tensor& result) = 0;
+	virtual ~Operator() = default;
 protected:
 	friend class Tensor;
 	Tensor tensor1;

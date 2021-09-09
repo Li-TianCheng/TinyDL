@@ -1,7 +1,6 @@
 //
 // Created by ltc on 2021/9/6.
 //
-#include <memory>
 #include "Tensor.h"
 #include "operator/Operator.h"
 #include "operator/AddOperator.h"
@@ -18,6 +17,13 @@ Tensor::Tensor(double value) : op(nullptr), value(nullptr), gradient(nullptr), c
 
 }
 
+Tensor::Tensor(int rowNum, int colNum) : op(nullptr), constValue(0), isConstant(false) {
+	value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
+	value->resize(rowNum, colNum);
+	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
+	gradient->resize(rowNum, colNum);
+}
+
 Tensor::Tensor(shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value, shared_ptr<Operator> op) : value(value), op(op), isConstant(false), constValue(0) {
 	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*value);
 	gradient->setZero();
@@ -27,7 +33,15 @@ double Tensor::operator()(int row, int col) {
 	return (*value)(row, col);
 }
 
-std::ostream& operator<<(std::ostream &out, Tensor& t) {
+int Tensor::row() {
+	return value->rows();
+}
+
+int Tensor::col() {
+	return value->cols();
+}
+
+std::ostream& operator<<(std::ostream &out, const Tensor& t) {
 	out << *t.value;
 	return out;
 }
@@ -36,7 +50,27 @@ void Tensor::clearGradient() {
 	gradient->setZero();
 }
 
-Matrix<double, Dynamic, Dynamic, RowMajor> Tensor::grad() {
+void Tensor::setZero() {
+	value->setZero();
+}
+
+void Tensor::setOnes() {
+	value->setOnes();
+}
+
+void Tensor::setIdentity() {
+	value->setIdentity();
+}
+
+void Tensor::setRandom() {
+	value->setRandom();
+}
+
+Tensor Tensor::copy() {
+	return Tensor(*value);
+}
+
+Tensor Tensor::grad() {
 	if (isConstant) {
 		auto m = Matrix<double, Dynamic, Dynamic, RowMajor>(1, 1);
 		m << 0;
@@ -54,10 +88,11 @@ void Tensor::backward() {
 
 void Tensor::_backward() {
 	if (op != nullptr) {
-		op->grad(*this);
+		op->backward(*this);
 		op->tensor1._backward();
 		op->tensor2._backward();
 	}
+	op = nullptr;
 }
 
 Tensor Tensor::operator+(const Tensor &t) {

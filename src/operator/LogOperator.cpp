@@ -13,6 +13,6 @@ Tensor LogOperator::operator()() {
 	return Tensor(value, shared_from_this());
 }
 
-void LogOperator::grad(Tensor& result) {
+void LogOperator::backward(Tensor& result) {
 	*tensor2.gradient += ((1 / (*tensor2.value).array()) * (*result.gradient).array()).matrix() / std::log(tensor1.constValue);
 }
