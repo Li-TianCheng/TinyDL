@@ -38,7 +38,8 @@ public:
 	int row();
 	int col();
 	Tensor copy();
-	Tensor grad();
+	Matrix<double, Dynamic, Dynamic, RowMajor>& operator*();
+	Matrix<double, Dynamic, Dynamic, RowMajor>& grad();
 	Tensor operator+(const Tensor& t);
 	Tensor& operator+=(const Tensor& t);
 	Tensor& operator++();
@@ -74,14 +75,13 @@ private:
 	void _backward();
 private:
 	bool isConstant;
-	double constValue;
 	shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value;
 	shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> gradient;
 	shared_ptr<Operator> op;
 };
 
 template<int rowNum, int colNum> inline
-Tensor::Tensor(Matrix<double, rowNum, colNum, RowMajor> value) : op(nullptr), isConstant(false), constValue(0) {
+Tensor::Tensor(Matrix<double, rowNum, colNum, RowMajor> value) : op(nullptr), isConstant(false) {
 	this->value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(value);
 	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(value);
 	gradient->setZero();

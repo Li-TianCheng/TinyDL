@@ -14,7 +14,7 @@ Tensor PowOperator::operator()() {
 		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>((*tensor2.value).array().exp().matrix());
 	}
 	if (tensor2.isConstant) {
-		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>((*tensor1.value).array().pow(tensor2.constValue).matrix());
+		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>((*tensor1.value).array().pow((*tensor2.value)(0, 0)).matrix());
 	}
 	return Tensor(value, shared_from_this());
 }
@@ -24,6 +24,6 @@ void PowOperator::backward(Tensor& result) {
 		*tensor2.gradient += ((*tensor2.value).array().exp() * (*result.gradient).array()).matrix();
 	}
 	if (tensor2.isConstant) {
-		*tensor1.gradient += ((*tensor1.value).array().pow(tensor2.constValue - 1) * (*result.gradient).array()).matrix() * tensor2.constValue;
+		*tensor1.gradient += ((*tensor1.value).array().pow((*tensor2.value)(0, 0) - 1) * (*result.gradient).array()).matrix() * (*tensor2.value)(0, 0);
 	}
 }

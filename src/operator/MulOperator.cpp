@@ -11,9 +11,9 @@ MulOperator::MulOperator(const Tensor &tensor1, const Tensor &tensor2) : Operato
 Tensor MulOperator::operator()() {
 	shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value = nullptr;
 	if (tensor1.isConstant) {
-		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(tensor1.constValue**tensor2.value);
+		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>((*tensor1.value)(0, 0)**tensor2.value);
 	} else if (tensor2.isConstant) {
-		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1.value*tensor2.constValue);
+		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1.value*(*tensor2.value)(0, 0));
 	} else {
 		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1.value**tensor2.value);
 	}
@@ -23,14 +23,14 @@ Tensor MulOperator::operator()() {
 void MulOperator::backward(Tensor& result) {
 	if (!tensor1.isConstant) {
 		if (tensor2.isConstant) {
-			*tensor1.gradient += tensor2.constValue * *result.gradient;
+			*tensor1.gradient += (*tensor2.value)(0, 0) * *result.gradient;
 		} else {
 			*tensor1.gradient += *result.gradient * (*tensor2.value).transpose();
 		}
 	}
 	if (!tensor2.isConstant) {
 		if (tensor1.isConstant) {
-			*tensor2.gradient += *result.gradient * tensor1.constValue;
+			*tensor2.gradient += *result.gradient * (*tensor1.value)(0, 0);
 		} else {
 			*tensor2.gradient += (*tensor1.value).transpose() * *result.gradient;
 		}

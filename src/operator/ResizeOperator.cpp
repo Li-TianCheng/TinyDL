@@ -10,14 +10,14 @@ ResizeOperator::ResizeOperator(const Tensor &tensor1, int rowNum, int colNum, bo
 
 Tensor ResizeOperator::operator()() {
 	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1.value);
-	value->resize(rowNum, colNum);
+	value->conservativeResize(rowNum, colNum);
 	return Tensor(value, shared_from_this());
 }
 
 void ResizeOperator::backward(Tensor &result) {
 	if (!isNew) {
-		result.gradient->resize(tensor1.gradient->rows(), tensor1.gradient->cols());
+		result.gradient->conservativeResize(tensor1.gradient->rows(), tensor1.gradient->cols());
 		*tensor1.gradient += *result.gradient;
-		result.gradient->resize(rowNum, colNum);
+		result.gradient->conservativeResize(rowNum, colNum);
 	}
 }

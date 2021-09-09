@@ -31,7 +31,7 @@ int main() {
 		cout << "out: " << out << endl;
 		out.backward();
 		for (auto& j : e.parameters) {
-			*j -= j->grad() * 0.01;
+			**j -= j->grad() * 0.01;
 			j->clearGradient();
 		}
 	}

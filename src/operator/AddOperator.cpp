@@ -13,11 +13,11 @@ Tensor AddOperator::operator()() {
 	if (tensor1.isConstant) {
 		Matrix<double, Dynamic, Dynamic> m(*tensor2.value);
 		m.setOnes();
-		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(tensor1.constValue*m + *tensor2.value);
+		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>((*tensor1.value)(0, 0)*m + *tensor2.value);
 	} else if (tensor2.isConstant) {
 		Matrix<double, Dynamic, Dynamic> m(*tensor1.value);
 		m.setOnes();
-		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1.value + tensor2.constValue*m);
+		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1.value + (*tensor2.value)(0, 0)*m);
 	} else {
 		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1.value+*tensor2.value);
 	}
