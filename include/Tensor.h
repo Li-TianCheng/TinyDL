@@ -23,6 +23,7 @@ public:
 	Tensor(int rowNum, int colNum);
 	template<int rowNum, int colNum>
 	Tensor(Matrix<double, rowNum, colNum, RowMajor> value);
+	Tensor(shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>>, shared_ptr<Operator> op);
 	Tensor(const Tensor& t) = default;
 	Tensor(Tensor&& t) = default;
 	Tensor& operator=(const Tensor& t) = default;
@@ -35,6 +36,7 @@ public:
 	void setOnes();
 	void setIdentity();
 	void setRandom();
+	bool isConstant() const;
 	int row() const;
 	int col() const;
 	Tensor copy() const;
@@ -60,29 +62,16 @@ public:
 	Tensor dot(const Tensor& t) const;
 private:
 	friend std::ostream& operator<<(std::ostream &out, const Tensor& t);
-	friend class Operator;
-	friend class AddOperator;
-	friend class SubOperator;
-	friend class MulOperator;
-	friend class DivOperator;
-	friend class PowOperator;
-	friend class LogOperator;
-	friend class ResizeOperator;
-	friend class TransposeOperator;
-	friend class DotOperator;
-	friend class ReluOperator;
-private:
-	Tensor(shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>>, shared_ptr<Operator> op);
 	void _backward();
 private:
-	bool isConstant;
+	bool constant;
 	shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value;
 	shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> gradient;
 	shared_ptr<Operator> op;
 };
 
 template<int rowNum, int colNum> inline
-Tensor::Tensor(Matrix<double, rowNum, colNum, RowMajor> value) : op(nullptr), isConstant(false) {
+Tensor::Tensor(Matrix<double, rowNum, colNum, RowMajor> value) : op(nullptr), constant(false) {
 	this->value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(value);
 	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(value);
 	gradient->setZero();

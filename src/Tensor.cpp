@@ -13,20 +13,20 @@
 #include "operator/TransposeOperator.h"
 #include "operator/DotOperator.h"
 
-Tensor::Tensor(double value) : op(nullptr), value(nullptr), gradient(nullptr), isConstant(true) {
+Tensor::Tensor(double value) : op(nullptr), value(nullptr), gradient(nullptr), constant(true) {
 	this->value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(1, 1);
 	*this->value << value;
 	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(1, 1);
 }
 
-Tensor::Tensor(int rowNum, int colNum) : op(nullptr), isConstant(false) {
+Tensor::Tensor(int rowNum, int colNum) : op(nullptr), constant(false) {
 	value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
 	value->resize(rowNum, colNum);
 	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
 	gradient->resize(rowNum, colNum);
 }
 
-Tensor::Tensor(shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value, shared_ptr<Operator> op) : value(value), op(op), isConstant(false) {
+Tensor::Tensor(shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value, shared_ptr<Operator> op) : value(value), op(op), constant(false) {
 	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*value);
 	gradient->setZero();
 }
@@ -41,6 +41,10 @@ int Tensor::row() const {
 
 int Tensor::col() const {
 	return value->cols();
+}
+
+bool Tensor::isConstant() const {
+	return constant;
 }
 
 std::ostream& operator<<(std::ostream &out, const Tensor& t) {
@@ -81,7 +85,7 @@ Matrix<double, Dynamic, Dynamic, RowMajor>& Tensor::grad() {
 }
 
 void Tensor::backward() {
-	if (!isConstant) {
+	if (!constant) {
 		gradient->resize(value->rows(), value->cols());
 		gradient->setOnes();
 		_backward();

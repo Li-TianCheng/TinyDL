@@ -14,8 +14,9 @@ class Model {
 public:
 	Tensor operator()(const Tensor& input);
 	virtual Tensor forward(const Tensor& input) = 0;
+	virtual ~Model() = default;
 public:
-	vector<Tensor*> parameters;
+	vector<Tensor> parameters;
 };
 
 

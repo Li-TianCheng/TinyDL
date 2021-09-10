@@ -7,9 +7,9 @@
 Linear::Linear(Model& m, int inputNum, int outputNum, bool base) : weight(inputNum, outputNum), base(1, outputNum), isBase(base) {
 	weight.setRandom();
 	this->base.setRandom();
-	m.parameters.push_back(&weight);
+	m.parameters.push_back(weight);
 	if (isBase) {
-		m.parameters.push_back(&this->base);
+		m.parameters.push_back(this->base);
 	}
 }
 

@@ -9,7 +9,7 @@ ReluOperator::ReluOperator(const Tensor &tensor1) : Operator(tensor1, 0) {
 }
 
 Tensor ReluOperator::operator()() {
-	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1.value);
+	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1);
 	for (int i = 0; i < value->rows(); ++i) {
 		for (int j = 0; j < value->cols(); ++j) {
 			if ((*value)(i, j) < 0) {
@@ -21,7 +21,7 @@ Tensor ReluOperator::operator()() {
 }
 
 void ReluOperator::backward(Tensor &result) {
-	auto value = *tensor1.value;
+	auto value = *tensor1;
 	for (int i = 0; i < value.rows(); ++i) {
 		for (int j = 0; j < value.cols(); ++j) {
 			if (value(i, j) <= 0) {
@@ -31,5 +31,5 @@ void ReluOperator::backward(Tensor &result) {
 			}
 		}
 	}
-	*tensor1.gradient += (value.array() * (*result.gradient).array()).matrix();
+	tensor1.grad() += (value.array() * result.grad().array()).matrix();
 }

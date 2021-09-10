@@ -9,12 +9,12 @@ TransposeOperator::TransposeOperator(const Tensor &tensor1, bool isNew) : Operat
 }
 
 Tensor TransposeOperator::operator()() {
-	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>((*tensor1.value).transpose());
+	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>((*tensor1).transpose());
 	return Tensor(value, shared_from_this());
 }
 
 void TransposeOperator::backward(Tensor &result) {
 	if (!isNew) {
-		*tensor1.gradient += (*result.gradient).transpose();
+		tensor1.grad() += result.grad().transpose();
 	}
 }
