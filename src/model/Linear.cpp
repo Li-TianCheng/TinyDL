@@ -13,7 +13,7 @@ Linear::Linear(Model& m, int inputNum, int outputNum, bool base) : weight(inputN
 	}
 }
 
-Tensor Linear::operator()(Tensor &input) {
+Tensor Linear::operator()(const Tensor &input) {
 	if (isBase) {
 		Tensor t(input.row(), 1);
 		t.setOnes();

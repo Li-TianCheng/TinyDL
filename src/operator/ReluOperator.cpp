@@ -1,0 +1,35 @@
+//
+// Created by ltc on 2021/9/10.
+//
+
+#include "operator/ReluOperator.h"
+
+ReluOperator::ReluOperator(const Tensor &tensor1) : Operator(tensor1, 0) {
+
+}
+
+Tensor ReluOperator::operator()() {
+	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(*tensor1.value);
+	for (int i = 0; i < value->rows(); ++i) {
+		for (int j = 0; j < value->cols(); ++j) {
+			if ((*value)(i, j) < 0) {
+				(*value)(i, j) = 0;
+			}
+		}
+	}
+	return Tensor(value, shared_from_this());
+}
+
+void ReluOperator::backward(Tensor &result) {
+	auto value = *tensor1.value;
+	for (int i = 0; i < value.rows(); ++i) {
+		for (int j = 0; j < value.cols(); ++j) {
+			if (value(i, j) <= 0) {
+				value(i, j) = 0;
+			} else {
+				value(i, j) = 1;
+			}
+		}
+	}
+	*tensor1.gradient += (value.array() * (*result.gradient).array()).matrix();
+}

@@ -2,15 +2,19 @@
 #include "Tensor.h"
 #include "model/Model.h"
 #include "model/Linear.h"
+#include "model/ActivateFun.h"
 
 using namespace std;
 
 class Example : public Model {
 public:
-	Tensor forward(Tensor &input) override {
+	Tensor forward(const Tensor &input) override {
 		auto out = fc1(input);
+		out = relu(out);
 		out = fc2(out);
+		out = relu(out);
 		out = fc3(out);
+		out = sigmoid(out);
 		return out;
 	}
 private:

@@ -35,11 +35,11 @@ double Tensor::operator()(int row, int col) {
 	return (*value)(row, col);
 }
 
-int Tensor::row() {
+int Tensor::row() const {
 	return value->rows();
 }
 
-int Tensor::col() {
+int Tensor::col() const {
 	return value->cols();
 }
 
@@ -68,7 +68,7 @@ void Tensor::setRandom() {
 	value->setRandom();
 }
 
-Tensor Tensor::copy() {
+Tensor Tensor::copy() const{
 	return Tensor(*value);
 }
 
@@ -97,7 +97,7 @@ void Tensor::_backward() {
 	op = nullptr;
 }
 
-Tensor Tensor::operator+(const Tensor &t) {
+Tensor Tensor::operator+(const Tensor &t) const {
 	return (*shared_ptr<Operator>(new AddOperator(*this, t)))();
 }
 
@@ -117,7 +117,7 @@ Tensor Tensor::operator++(int) {
 	return tmp;
 }
 
-Tensor Tensor::operator-(const Tensor &t) {
+Tensor Tensor::operator-(const Tensor &t) const {
 	return (*shared_ptr<Operator>(new SubOperator(*this, t)))();
 }
 
@@ -137,7 +137,7 @@ Tensor Tensor::operator--(int) {
 	return tmp;
 }
 
-Tensor Tensor::operator*(const Tensor &t) {
+Tensor Tensor::operator*(const Tensor &t) const {
 	return (*shared_ptr<Operator>(new MulOperator(*this, t)))();
 }
 
@@ -146,7 +146,7 @@ Tensor &Tensor::operator*=(const Tensor &t) {
 	return *this;
 }
 
-Tensor Tensor::operator/(const Tensor &t) {
+Tensor Tensor::operator/(const Tensor &t) const {
 	return (*shared_ptr<Operator>(new DivOperator(*this, t)))();
 }
 
@@ -155,26 +155,26 @@ Tensor &Tensor::operator/=(const Tensor &t) {
 	return *this;
 }
 
-Tensor Tensor::log(double t) {
+Tensor Tensor::log(double t) const {
 	return (*shared_ptr<Operator>(new LogOperator(t, *this)))();
 }
 
-Tensor Tensor::pow(double t) {
+Tensor Tensor::pow(double t) const {
 	return (*shared_ptr<Operator>(new PowOperator(*this, t)))();
 }
 
-Tensor Tensor::exp() {
+Tensor Tensor::exp() const{
 	return (*shared_ptr<Operator>(new PowOperator(1.0, *this)))();
 }
 
-Tensor Tensor::resize(int rowNum, int colNum, bool isNew) {
+Tensor Tensor::resize(int rowNum, int colNum, bool isNew) const {
 	return (*shared_ptr<Operator>(new ResizeOperator(*this, rowNum, colNum, isNew)))();
 }
 
-Tensor Tensor::transpose(bool isNew) {
+Tensor Tensor::transpose(bool isNew) const {
 	return (*shared_ptr<Operator>(new TransposeOperator(*this, isNew)))();
 }
 
-Tensor Tensor::dot(const Tensor &t) {
+Tensor Tensor::dot(const Tensor &t) const {
 	return (*shared_ptr<Operator>(new DotOperator(*this, t)))();
 }

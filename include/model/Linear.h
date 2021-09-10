@@ -14,7 +14,7 @@ using std::vector;
 class Linear {
 public:
 	Linear(Model& m, int inputNum, int outputNum, bool base=true);
-	Tensor operator()(Tensor& input);
+	Tensor operator()(const Tensor& input);
 private:
 	bool isBase;
 	Tensor weight;

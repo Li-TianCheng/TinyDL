@@ -12,8 +12,8 @@ using std::vector;
 
 class Model {
 public:
-	Tensor operator()(Tensor& input);
-	virtual Tensor forward(Tensor& input) = 0;
+	Tensor operator()(const Tensor& input);
+	virtual Tensor forward(const Tensor& input) = 0;
 public:
 	vector<Tensor*> parameters;
 };
