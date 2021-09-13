@@ -16,9 +16,3 @@ Tensor tanh(const Tensor& t) {
 Tensor relu(const Tensor& t) {
 	return (*shared_ptr<Operator>(new ReluOperator(t)))();
 }
-
-Tensor softmax(const Tensor& t) {
-	Tensor tmp(t.col(), t.col());
-	tmp.setOnes();
-	return t.exp().dot((t.exp() * tmp).pow(-1));
-}

@@ -2,6 +2,7 @@
 #include "Tensor.h"
 #include "model/Model.h"
 #include "model/Linear.h"
+#include "model/Convolution.h"
 #include "model/BatchNorm.h"
 #include "model/ActivateFun.h"
 #include "model/LossFun.h"
@@ -12,8 +13,10 @@ using namespace std;
 class Example : public Model {
 public:
 	Tensor forward(const Tensor &input) override {
-		auto out = fc1(input);
+		auto out = conv(input);
 		out = b1(out);
+		out = relu(out);
+		out = fc1(out);
 		out = relu(out);
 		out = fc2(out);
 		out = sigmoid(out);
@@ -23,16 +26,17 @@ public:
 		return out;
 	}
 private:
-	Linear fc1 = Linear(*this, 10, 400);
-	BatchNorm b1 = BatchNorm(*this, 400);
+	Convolution conv = Convolution(*this, 3, 2, 5, 5, 3, 3, 2);
+	BatchNorm b1 = BatchNorm(*this, 8);
+	Linear fc1 = Linear(*this, 8, 400);
 	Linear fc2 = Linear(*this, 400, 200);
 	Linear fc3 = Linear(*this, 200, 100);
 	Linear fc4 = Linear(*this, 100, 10);
 };
 
 int main() {
-	// TODO：Cnn、BatchNorm、Rnn、Lstm
-	Tensor t(100, 10);
+	// TODO：Rnn、Lstm
+	Tensor t(100, 5*5*3);
 	t.setRandom();
 	Example e;
 	AdamOptimizer op(e.parameters);

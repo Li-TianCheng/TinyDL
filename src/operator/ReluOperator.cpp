@@ -24,12 +24,9 @@ void ReluOperator::backward(Tensor &result) {
 	auto value = *tensor1;
 	for (int i = 0; i < value.rows(); ++i) {
 		for (int j = 0; j < value.cols(); ++j) {
-			if (value(i, j) <= 0) {
-				value(i, j) = 0;
-			} else {
-				value(i, j) = 1;
+			if (value(i, j) > 0) {
+				tensor1.grad()(i, j) += result.grad()(i, j);
 			}
 		}
 	}
-	tensor1.grad() += (value.array() * result.grad().array()).matrix();
 }

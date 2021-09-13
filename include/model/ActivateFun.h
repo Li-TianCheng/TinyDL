@@ -10,6 +10,5 @@
 Tensor sigmoid(const Tensor& t);
 Tensor tanh(const Tensor& t);
 Tensor relu(const Tensor& t);
-Tensor softmax(const Tensor& t);
 
 #endif //TINYDL_ACTIVATEFUN_H
