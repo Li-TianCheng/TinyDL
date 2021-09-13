@@ -5,11 +5,8 @@
 #ifndef TINYDL_LINEAR_H
 #define TINYDL_LINEAR_H
 
-#include <vector>
 #include "Tensor.h"
 #include "model/Model.h"
-
-using std::vector;
 
 class Linear {
 public:
