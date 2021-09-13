@@ -6,6 +6,7 @@
 #include "model/BatchNorm.h"
 #include "model/ActivateFun.h"
 #include "model/LossFun.h"
+#include "model/Utils.h"
 #include "optimizer/AdamOptimizer.h"
 
 using namespace std;
@@ -16,6 +17,7 @@ public:
 		auto out = conv(input);
 		out = b1(out);
 		out = relu(out);
+		out = maxPool(out, 2, 2, 2, 2, 2);
 		out = fc1(out);
 		out = relu(out);
 		out = fc2(out);
@@ -28,7 +30,7 @@ public:
 private:
 	Convolution conv = Convolution(*this, 3, 2, 5, 5, 3, 3, 2);
 	BatchNorm b1 = BatchNorm(*this, 8);
-	Linear fc1 = Linear(*this, 8, 400);
+	Linear fc1 = Linear(*this, 2, 400);
 	Linear fc2 = Linear(*this, 400, 200);
 	Linear fc3 = Linear(*this, 200, 100);
 	Linear fc4 = Linear(*this, 100, 10);

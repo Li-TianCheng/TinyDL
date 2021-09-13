@@ -8,6 +8,6 @@
 #include "Tensor.h"
 
 Tensor softmax(const Tensor& t);
-Tensor maxPool(const Tensor& t, int kernelRow, int kernelCol, int stride=1);
+Tensor maxPool(const Tensor& t, int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride=1);
 
 #endif //TINYDL_UTILS_H
