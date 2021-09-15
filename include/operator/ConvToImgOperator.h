@@ -9,11 +9,11 @@
 
 class ConvToImgOperator : public Operator {
 public:
-	ConvToImgOperator(const Tensor& tensor1, int channel);
+	ConvToImgOperator(const Tensor& tensor1, int num);
 	Tensor operator()() override;
 	void backward(Tensor& result) override;
 private:
-	int channel;
+	int num;
 };
 
 

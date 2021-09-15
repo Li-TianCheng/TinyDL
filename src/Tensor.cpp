@@ -22,8 +22,24 @@ Tensor::Tensor(double value) : op(nullptr), value(nullptr), gradient(nullptr), c
 Tensor::Tensor(int rowNum, int colNum) : op(nullptr), constant(false) {
 	value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
 	value->resize(rowNum, colNum);
+	value->setZero();
 	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
 	gradient->resize(rowNum, colNum);
+	gradient->setZero();
+}
+
+Tensor::Tensor(const vector<vector<double>>& v) : op(nullptr), constant(false) {
+	value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
+	value->resize(v.size(), v[0].size());
+	value->setZero();
+	for (int i = 0; i < v.size(); ++i) {
+		for (int j = 0; j < v[0].size(); ++j) {
+			(*value)(i, j) = v[i][j];
+		}
+	}
+	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
+	gradient->resize(v.size(), v[0].size());
+	gradient->setZero();
 }
 
 Tensor::Tensor(shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value, shared_ptr<Operator> op) : value(value), op(op), constant(false) {

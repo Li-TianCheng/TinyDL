@@ -37,12 +37,11 @@ private:
 };
 
 int main() {
-	// TODO：Rnn、Lstm
-	Tensor t(100, 5*5*3);
+	Tensor t(1000, 5*5*3);
 	t.setRandom();
 	Example e;
 	AdamOptimizer op(e.parameters);
-	Tensor label(100,10);
+	Tensor label(1000,10);
 	label.setRandom();
 
 	for (int i = 0; i < 100; i++) {

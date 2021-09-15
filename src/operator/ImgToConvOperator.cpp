@@ -13,6 +13,7 @@ ImgToConvOperator::ImgToConvOperator(const Tensor &tensor1, int channel, int dat
 Tensor ImgToConvOperator::operator()() {
 	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
 	value->resize(tensor1.row()*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1), kernelRow*kernelCol*channel);
+	value->setZero();
 	for (int i = 0; i < tensor1.row(); ++i) {
 		for (int j = 0; j < dataRow*dataCol; ++j) {
 			int x = j / dataCol;

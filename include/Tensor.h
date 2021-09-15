@@ -5,12 +5,17 @@
 #ifndef TINYDL_TENSOR_H
 #define TINYDL_TENSOR_H
 
+#define EIGEN_USE_MKL_VML
+#define EIGEN_VECTORIZE_SSE4_2
+
 #include <eigen3/Eigen/Core>
 #include <memory>
 #include <iostream>
+#include <vector>
 
 using std::shared_ptr;
 using std::static_pointer_cast;
+using std::vector;
 using Eigen::Matrix;
 using Eigen::Dynamic;
 using Eigen::RowMajor;
@@ -21,8 +26,9 @@ class Tensor {
 public:
 	Tensor(double value);
 	Tensor(int rowNum, int colNum);
+	explicit Tensor(const vector<vector<double>>& v);
 	template<int rowNum, int colNum>
-	Tensor(Matrix<double, rowNum, colNum, RowMajor> value);
+	explicit Tensor(Matrix<double, rowNum, colNum, RowMajor> value);
 	Tensor(shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>>, shared_ptr<Operator> op);
 	Tensor(const Tensor& t) = default;
 	Tensor(Tensor&& t) = default;
