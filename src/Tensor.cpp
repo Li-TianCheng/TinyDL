@@ -47,7 +47,7 @@ Tensor::Tensor(shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value, sha
 	gradient->setZero();
 }
 
-double Tensor::operator()(int row, int col) {
+double Tensor::operator()(int row, int col) const {
 	return (*value)(row, col);
 }
 
@@ -72,6 +72,11 @@ void Tensor::clearGradient() {
 	gradient->setZero();
 }
 
+
+void Tensor::freeOperator() {
+	op = nullptr;
+}
+
 void Tensor::setZero() {
 	value->setZero();
 }
@@ -86,13 +91,14 @@ void Tensor::setIdentity() {
 
 void Tensor::setRandom() {
 	value->setRandom();
+	*value /= sqrt(value->cols());
 }
 
 Tensor Tensor::copy() const{
 	return Tensor(*value);
 }
 
-Matrix<double, Dynamic, Dynamic, RowMajor>& Tensor::operator*() {
+Matrix<double, Dynamic, Dynamic, RowMajor>& Tensor::operator*() const {
 	return *value;
 }
 
@@ -109,7 +115,7 @@ void Tensor::backward() {
 }
 
 void Tensor::_backward() {
-	if (op != nullptr) {
+	if (op != nullptr && op.use_count() == 1) {
 		op->backward(*this);
 		op->tensor1._backward();
 		op->tensor2._backward();

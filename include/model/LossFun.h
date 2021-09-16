@@ -6,8 +6,9 @@
 #define TINYDL_LOSSFUN_H
 
 #include "Tensor.h"
+#include "model/UtilsFun.h"
 
-Tensor MSELoss(const Tensor& pred, const Tensor& label);
-Tensor crossEntropyLoss(const Tensor& pred, const Tensor& label);
+Tensor MSELoss(Tensor& pred, Tensor& label);
+Tensor crossEntropyLoss(Tensor& pred, Tensor& label);
 
 #endif //TINYDL_LOSSFUN_H

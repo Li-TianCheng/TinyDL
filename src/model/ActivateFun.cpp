@@ -3,7 +3,6 @@
 //
 
 #include "model/ActivateFun.h"
-#include "operator/ReluOperator.h"
 
 Tensor sigmoid(const Tensor& t) {
 	return (t.exp().pow(-1)+1).pow(-1);
@@ -14,5 +13,13 @@ Tensor tanh(const Tensor& t) {
 }
 
 Tensor relu(const Tensor& t) {
-	return (*shared_ptr<Operator>(new ReluOperator(t)))();
+	Tensor tmp(t.row(), t.col());
+	for (int i = 0; i < tmp.row(); ++i) {
+		for (int j = 0; j < tmp.col(); ++j) {
+			if (t(i, j) > 0) {
+				(*tmp)(i, j) = 1;
+			}
+		}
+	}
+	return t.dot(tmp);
 }

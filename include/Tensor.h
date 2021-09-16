@@ -35,9 +35,10 @@ public:
 	Tensor& operator=(const Tensor& t) = default;
 	Tensor& operator=(Tensor&& t) = default;
 	~Tensor() = default;
-	double operator()(int row, int col);
+	double operator()(int row, int col) const;
 	void backward();
 	void clearGradient();
+	void freeOperator();
 	void setZero();
 	void setOnes();
 	void setIdentity();
@@ -46,7 +47,7 @@ public:
 	int row() const;
 	int col() const;
 	Tensor copy() const;
-	Matrix<double, Dynamic, Dynamic, RowMajor>& operator*();
+	Matrix<double, Dynamic, Dynamic, RowMajor>& operator*() const;
 	Matrix<double, Dynamic, Dynamic, RowMajor>& grad();
 	Tensor operator+(const Tensor& t) const;
 	Tensor& operator+=(const Tensor& t);

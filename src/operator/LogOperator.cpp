@@ -14,5 +14,5 @@ Tensor LogOperator::operator()() {
 }
 
 void LogOperator::backward(Tensor& result) {
-	tensor2.grad() += ((1 / (*tensor2).array()) * (result.grad()).array()).matrix() / std::log((*tensor1)(0, 0));
+	tensor2.grad() += ((result.grad()).array() / (*tensor2).array()).matrix() / std::log((*tensor1)(0, 0));
 }
