@@ -55,7 +55,7 @@ find_path(MKL_ROOT_DIR
 		include/mkl_cblas.h
 		PATHS
 		$ENV{MKLDIR}
-		/opt/intel/oneapi/mkl/*/
+		/opt/intel/mkl/*/
 		/opt/intel/cmkl/*/
 		/Library/Frameworks/Intel_MKL.framework/Versions/Current/lib/universal
 		"Program Files (x86)/Intel/ComposerXE-2011/mkl"
@@ -156,35 +156,12 @@ IF(NOT MKL_LAPACK_LIBRARY)
 			)
 ENDIF()
 
-# iomp5
-IF("${MKL_ARCH_DIR}" STREQUAL "32")
-	IF(UNIX AND NOT APPLE)
-		find_library(MKL_IOMP5_LIBRARY
-				iomp5
-				PATHS
-				${MKL_ROOT_DIR}/../lib/ia32
-				)
-	ELSE()
-		SET(MKL_IOMP5_LIBRARY "") # no need for mac
-	ENDIF()
-else()
-	IF(UNIX AND NOT APPLE)
-		find_library(MKL_IOMP5_LIBRARY
-				iomp5
-				PATHS
-				${MKL_ROOT_DIR}/../lib/intel64
-				)
-	ELSE()
-		SET(MKL_IOMP5_LIBRARY "") # no need for mac
-	ENDIF()
-ENDIF()
-
 foreach (MODEVAR ${MKL_MODE_VARIANTS})
 	foreach (THREADVAR ${MKL_THREAD_VARIANTS})
 		if (MKL_CORE_LIBRARY AND MKL_${MODEVAR}_LIBRARY AND MKL_${THREADVAR}_LIBRARY)
 			set(MKL_${MODEVAR}_${THREADVAR}_LIBRARIES
 					${MKL_${MODEVAR}_LIBRARY} ${MKL_${THREADVAR}_LIBRARY} ${MKL_CORE_LIBRARY}
-					${MKL_LAPACK_LIBRARY} ${MKL_IOMP5_LIBRARY})
+					${MKL_LAPACK_LIBRARY})
 			message("${MODEVAR} ${THREADVAR} ${MKL_${MODEVAR}_${THREADVAR}_LIBRARIES}") # for debug
 		endif()
 	endforeach()

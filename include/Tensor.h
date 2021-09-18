@@ -5,7 +5,7 @@
 #ifndef TINYDL_TENSOR_H
 #define TINYDL_TENSOR_H
 
-#define EIGEN_USE_MKL_VML
+#define EIGEN_USE_MKL_ALL
 #define EIGEN_VECTORIZE_SSE4_2
 
 #include <eigen3/Eigen/Core>
