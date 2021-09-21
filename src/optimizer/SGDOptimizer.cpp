@@ -11,6 +11,7 @@ SGDOptimizer::SGDOptimizer(const vector<Tensor> &parameters, double lr, double r
 }
 
 void SGDOptimizer::step() {
+#pragma omp parallel for
 	for (int i = 0; i < parameters.size(); ++i) {
 		*v[i] = *v[i] * rho + parameters[i].grad();
 		*parameters[i] -= *v[i] * lr;

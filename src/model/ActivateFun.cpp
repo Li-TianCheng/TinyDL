@@ -14,6 +14,7 @@ Tensor tanh(const Tensor& t) {
 
 Tensor relu(const Tensor& t) {
 	Tensor tmp(t.row(), t.col());
+#pragma omp parallel
 	for (int i = 0; i < tmp.row(); ++i) {
 		for (int j = 0; j < tmp.col(); ++j) {
 			if (t(i, j) > 0) {

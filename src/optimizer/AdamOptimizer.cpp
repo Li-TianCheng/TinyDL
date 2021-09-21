@@ -13,6 +13,7 @@ AdamOptimizer::AdamOptimizer(const vector<Tensor> &parameters, double lr, double
 
 void AdamOptimizer::step() {
 	++t;
+#pragma omp parallel for
 	for (int i = 0; i < parameters.size(); ++i) {
 		*m[i] = *m[i] * beta1 + parameters[i].grad() * (1-beta1);
 		*v[i] = *v[i] * beta2 + parameters[i].grad().array().pow(2).matrix() * (1-beta2);

@@ -12,6 +12,7 @@ Tensor ConvToImgOperator::operator()() {
 	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
 	value->resize(tensor1.row()/num, tensor1.col()*num);
 	value->setZero();
+#pragma omp parallel for
 	for (int i = 0; i < tensor1.row(); ++i) {
 		for (int j = 0; j < tensor1.col(); ++j) {
 			(*value)(i/num, j*num+i%num) = tensor1(i, j);
@@ -21,6 +22,7 @@ Tensor ConvToImgOperator::operator()() {
 }
 
 void ConvToImgOperator::backward(Tensor &result) {
+#pragma omp parallel for
 	for (int i = 0; i < tensor1.row(); ++i) {
 		for (int j = 0; j < tensor1.col(); ++j) {
 			tensor1.grad()(i, j) += result.grad()(i/num, j*num+i%num);
