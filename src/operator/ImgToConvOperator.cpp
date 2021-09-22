@@ -11,8 +11,7 @@ ImgToConvOperator::ImgToConvOperator(const Tensor &tensor1, int channel, int dat
 }
 
 Tensor ImgToConvOperator::operator()() {
-	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
-	value->resize(tensor1.row()*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1), kernelRow*kernelCol*channel);
+	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(tensor1.row()*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1), kernelRow*kernelCol*channel);
 	value->setZero();
 #pragma omp parallel for collapse(2)
 	for (int i = 0; i < tensor1.row(); ++i) {

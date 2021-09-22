@@ -9,8 +9,7 @@ ConvToImgOperator::ConvToImgOperator(const Tensor &tensor1, int num) : Operator(
 }
 
 Tensor ConvToImgOperator::operator()() {
-	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>();
-	value->resize(tensor1.row()/num, tensor1.col()*num);
+	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(tensor1.row()/num, tensor1.col()*num);
 	value->setZero();
 #pragma omp parallel for
 	for (int i = 0; i < tensor1.row(); ++i) {

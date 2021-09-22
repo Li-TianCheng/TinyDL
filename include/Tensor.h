@@ -80,7 +80,7 @@ private:
 template<int rowNum, int colNum> inline
 Tensor::Tensor(Matrix<double, rowNum, colNum, RowMajor> value) : op(nullptr), constant(false) {
 	this->value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(value);
-	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(value);
+	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(value.rows(), value.cols());
 	gradient->setZero();
 }
 
