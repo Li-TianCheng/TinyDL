@@ -97,6 +97,7 @@ int main() {
 	vector<vector<double>> mnistData = readMnistData("../data/train-images.idx3-ubyte");
 	vector<double> mnistLabel = readMnistLabel("../data/train-labels.idx1-ubyte");
 	Example e;
+	e.cuda();
 	AdamOptimizer op(e.parameters);
 	int batchSize = 128;
 	int index = 0;
@@ -113,8 +114,8 @@ int main() {
 			batchLabel[j] = mnistLabel[idx[index]];
 			index = (index+1) % (int)mnistData.size();
 		}
-		Tensor data(batchData);
-		Tensor label({batchLabel});
+		Tensor data(batchData, true);
+		Tensor label({batchLabel}, true);
 		op.clearGradient();
 		Tensor out = e(data);
 		Tensor loss = crossEntropyLoss(out, label);
@@ -130,7 +131,7 @@ int main() {
 				rightNum++;
 			}
 		}
-		cout << "step: " << i+1 << " loss: " << loss << " acc: " << (double)rightNum/batchSize << endl;
+		cout << "step: " << i+1 << " loss: " << loss(0, 0) << " acc: " << (double)rightNum/batchSize << endl;
 		loss.backward();
 		op.step();
 	}

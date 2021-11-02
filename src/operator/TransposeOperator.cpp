@@ -4,12 +4,12 @@
 
 #include "operator/TransposeOperator.h"
 
-TransposeOperator::TransposeOperator(const Tensor &tensor1, bool isNew) : Operator(tensor1, 0), isNew(isNew) {
+TransposeOperator::TransposeOperator(const Tensor &tensor1, bool isNew) : Operator(tensor1, Tensor(0, tensor1.isCuda())), isNew(isNew) {
 
 }
 
 Tensor TransposeOperator::operator()() {
-	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>((*tensor1).transpose());
+	auto value = std::make_shared<CuMatrix>((*tensor1).transpose());
 	return Tensor(value, shared_from_this());
 }
 

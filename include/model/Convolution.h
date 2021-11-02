@@ -13,7 +13,7 @@
 
 class Convolution {
 public:
-	Convolution(Model& m, int inputChannel, int outputChannel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride=1, bool base=true);
+	Convolution(Model& m, int inputChannel, int outputChannel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride=1, bool bias=true);
 	Tensor operator()(const Tensor& input);
 private:
 	int inputChannel;

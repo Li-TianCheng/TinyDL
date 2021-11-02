@@ -6,6 +6,7 @@
 #define TINYDL_ACTIVATEFUN_H
 
 #include "Tensor.h"
+#include "operator/ReluOperator.h"
 
 Tensor sigmoid(const Tensor& t);
 Tensor tanh(const Tensor& t);

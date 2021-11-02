@@ -9,21 +9,21 @@ PowOperator::PowOperator(const Tensor &tensor1, const Tensor &tensor2) : Operato
 }
 
 Tensor PowOperator::operator()() {
-	shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value = nullptr;
+	shared_ptr<CuMatrix> value = nullptr;
 	if (tensor1.isConstant()) {
-		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>((*tensor2).array().exp().matrix());
+		value = std::make_shared<CuMatrix>((*tensor2).exp());
 	}
 	if (tensor2.isConstant()) {
-		value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>((*tensor1).array().pow((*tensor2)(0, 0)).matrix());
+		value = std::make_shared<CuMatrix>((*tensor1).pow((*tensor2)(0, 0)));
 	}
 	return Tensor(value, shared_from_this());
 }
 
 void PowOperator::backward(Tensor& result) {
 	if (tensor1.isConstant()) {
-		tensor2.grad() += ((*tensor2).array().exp() * result.grad().array()).matrix();
+		tensor2.grad() += (*tensor2).exp().dot(result.grad());
 	}
 	if (tensor2.isConstant()) {
-		tensor1.grad() += ((*tensor1).array().pow((*tensor2)(0, 0) - 1) * result.grad().array()).matrix() * (*tensor2)(0, 0);
+		tensor1.grad() += (*tensor1).pow((*tensor2)(0, 0) - 1).dot(result.grad())* (*tensor2)(0, 0);
 	}
 }

@@ -12,12 +12,14 @@ using std::vector;
 
 class Optimizer {
 public:
-	explicit Optimizer(const vector<Tensor>& parameters);
+	explicit Optimizer(const vector<Tensor*>& parameters);
 	void clearGradient();
+	virtual void cuda();
+	virtual void cpu();
 	virtual void step() = 0;
 	virtual ~Optimizer() = default;
 protected:
-	vector<Tensor> parameters;
+	vector<Tensor*> parameters;
 };
 
 

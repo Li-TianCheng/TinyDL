@@ -9,10 +9,13 @@
 
 class SGDOptimizer : public Optimizer {
 public:
-	SGDOptimizer(const vector<Tensor>& parameters, double lr, double rho);
+	SGDOptimizer(const vector<Tensor*>& parameters, double lr, double rho);
 	void step() override;
+	void cuda() override;
+	void cpu() override;
+	~SGDOptimizer() override = default;
 private:
-	vector<Tensor> v;
+	vector<CuMatrix> v;
 	double lr;
 	double rho;
 };

@@ -9,10 +9,10 @@ LogOperator::LogOperator(const Tensor &tensor1, const Tensor &tensor2) : Operato
 }
 
 Tensor LogOperator::operator()() {
-	auto value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(((*tensor2).array().log() / std::log((*tensor1)(0, 0))).matrix());
+	auto value = std::make_shared<CuMatrix>((*tensor2).log() / std::log((*tensor1)(0, 0)));
 	return Tensor(value, shared_from_this());
 }
 
 void LogOperator::backward(Tensor& result) {
-	tensor2.grad() += ((result.grad()).array() / (*tensor2).array()).matrix() / std::log((*tensor1)(0, 0));
+	tensor2.grad() += result.grad().dot((*tensor2).pow(-1)) / std::log((*tensor1)(0, 0));
 }

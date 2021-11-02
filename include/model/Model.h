@@ -15,8 +15,10 @@ public:
 	Tensor operator()(const Tensor& input);
 	virtual Tensor forward(const Tensor& input) = 0;
 	virtual ~Model() = default;
+	void cuda();
+	void cpu();
 public:
-	vector<Tensor> parameters;
+	vector<Tensor*> parameters;
 };
 
 

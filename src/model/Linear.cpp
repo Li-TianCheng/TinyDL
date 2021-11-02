@@ -4,20 +4,20 @@
 
 #include "model/Linear.h"
 
-Linear::Linear(Model& m, int inputNum, int outputNum, bool base) : weight(inputNum, outputNum), base(1, outputNum), isBase(base) {
+Linear::Linear(Model& m, int inputNum, int outputNum, bool bias) : weight(inputNum, outputNum, false), bias(1, outputNum, false), isBias(bias) {
 	weight.setRandom();
-	this->base.setRandom();
-	m.parameters.push_back(weight);
-	if (isBase) {
-		m.parameters.push_back(this->base);
+	this->bias.setRandom();
+	m.parameters.push_back(&weight);
+	if (isBias) {
+		m.parameters.push_back(&this->bias);
 	}
 }
 
 Tensor Linear::operator()(const Tensor &input) {
-	if (isBase) {
-		Tensor t(input.row(), 1);
+	if (isBias) {
+		Tensor t(input.row(), 1, input.isCuda());
 		t.setOnes();
-		return input * weight + t * base;
+		return input * weight + t * bias;
 	}
 	return input * weight;
 }

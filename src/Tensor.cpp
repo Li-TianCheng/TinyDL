@@ -13,34 +13,41 @@
 #include "operator/TransposeOperator.h"
 #include "operator/DotOperator.h"
 
-Tensor::Tensor(double value) : op(nullptr), value(nullptr), gradient(nullptr), constant(true) {
-	this->value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(1, 1);
-	*this->value << value;
-	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(1, 1);
-}
-
-Tensor::Tensor(int rowNum, int colNum) : op(nullptr), constant(false) {
-	value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(rowNum, colNum);
-	value->setZero();
-	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(rowNum, colNum);
+Tensor::Tensor(double value, bool cuda) : op(nullptr), value(nullptr), gradient(nullptr), constant(true) {
+	this->value = std::make_shared<CuMatrix>(1, 1, cuda);
+	this->value->setValue(0, 0, value);
+	gradient = std::make_shared<CuMatrix>(1, 1, cuda);
 	gradient->setZero();
 }
 
-Tensor::Tensor(const vector<vector<double>>& v) : op(nullptr), constant(false) {
-	value = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(v.size(), v[0].size());
+Tensor::Tensor(int rowNum, int colNum, bool cuda) : op(nullptr), constant(false) {
+	value = std::make_shared<CuMatrix>(rowNum, colNum, cuda);
+	value->setZero();
+	gradient = std::make_shared<CuMatrix>(rowNum, colNum, cuda);
+	gradient->setZero();
+}
+
+Tensor::Tensor(const vector<vector<double>>& v, bool cuda) : op(nullptr), constant(false) {
+	value = std::make_shared<CuMatrix>(v.size(), v[0].size(), cuda);
 	value->setZero();
 #pragma omp parallel for
 	for (int i = 0; i < v.size(); ++i) {
 		for (int j = 0; j < v[0].size(); ++j) {
-			(*value)(i, j) = v[i][j];
+			value->setValue(i, j, v[i][j]);
 		}
 	}
-	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(v.size(), v[0].size());
+	gradient = std::make_shared<CuMatrix>(v.size(), v[0].size(), cuda);
 	gradient->setZero();
 }
 
-Tensor::Tensor(shared_ptr<Matrix<double, Dynamic, Dynamic, RowMajor>> value, shared_ptr<Operator> op) : value(value), op(op), constant(false) {
-	gradient = std::make_shared<Matrix<double, Dynamic, Dynamic, RowMajor>>(value->rows(), value->cols());
+Tensor::Tensor(const CuMatrix& value) : op(nullptr), constant(false) {
+	this->value = std::make_shared<CuMatrix>(value);
+	gradient = std::make_shared<CuMatrix>((*value).rows(), (*value).cols(), value.isCuda());
+	gradient->setZero();
+}
+
+Tensor::Tensor(shared_ptr<CuMatrix> value, shared_ptr<Operator> op) : value(value), op(op), constant(false) {
+	gradient = std::make_shared<CuMatrix>((**value).rows(), (**value).cols(), value->isCuda());
 	gradient->setZero();
 }
 
@@ -49,26 +56,20 @@ double Tensor::operator()(int row, int col) const {
 }
 
 int Tensor::row() const {
-	return value->rows();
+	return (**value).rows();
 }
 
 int Tensor::col() const {
-	return value->cols();
+	return (**value).cols();
 }
 
 bool Tensor::isConstant() const {
 	return constant;
 }
 
-std::ostream& operator<<(std::ostream &out, const Tensor& t) {
-	out << *t.value;
-	return out;
-}
-
 void Tensor::clearGradient() {
 	gradient->setZero();
 }
-
 
 void Tensor::freeOperator() {
 	op = nullptr;
@@ -88,24 +89,24 @@ void Tensor::setIdentity() {
 
 void Tensor::setRandom() {
 	value->setRandom();
-	*value /= sqrt(value->cols());
+	*value /= sqrt((**value).cols());
 }
 
 Tensor Tensor::copy() const{
 	return Tensor(*value);
 }
 
-Matrix<double, Dynamic, Dynamic, RowMajor>& Tensor::operator*() const {
+CuMatrix& Tensor::operator*() const {
 	return *value;
 }
 
-Matrix<double, Dynamic, Dynamic, RowMajor>& Tensor::grad() {
+CuMatrix& Tensor::grad() {
 	return *gradient;
 }
 
 void Tensor::backward() {
 	if (!constant) {
-		gradient->resize(value->rows(), value->cols());
+		gradient->resize((**value).rows(), (**value).cols());
 		gradient->setOnes();
 		_backward();
 	}
@@ -130,11 +131,11 @@ Tensor &Tensor::operator+=(const Tensor &t) {
 }
 
 Tensor &Tensor::operator++() {
-	*this = *this + 1;
+	*this = *this + Tensor(1, isCuda());
 	return *this;
 }
 
-Tensor Tensor::operator++(int) {
+const Tensor Tensor::operator++(int) {
 	Tensor tmp = *this;
 	++*this;
 	return tmp;
@@ -150,11 +151,11 @@ Tensor &Tensor::operator-=(const Tensor &t) {
 }
 
 Tensor &Tensor::operator--() {
-	*this = *this - 1;
+	*this = *this - Tensor(1, isCuda());
 	return *this;
 }
 
-Tensor Tensor::operator--(int) {
+const Tensor Tensor::operator--(int) {
 	Tensor tmp = *this;
 	--*this;
 	return tmp;
@@ -179,15 +180,15 @@ Tensor &Tensor::operator/=(const Tensor &t) {
 }
 
 Tensor Tensor::log(double t) const {
-	return (*shared_ptr<Operator>(new LogOperator(t, *this)))();
+	return (*shared_ptr<Operator>(new LogOperator(Tensor(t, isCuda()), *this)))();
 }
 
 Tensor Tensor::pow(double t) const {
-	return (*shared_ptr<Operator>(new PowOperator(*this, t)))();
+	return (*shared_ptr<Operator>(new PowOperator(*this, Tensor(t, isCuda()))))();
 }
 
 Tensor Tensor::exp() const{
-	return (*shared_ptr<Operator>(new PowOperator(1.0, *this)))();
+	return (*shared_ptr<Operator>(new PowOperator(Tensor(1.0, isCuda()), *this)))();
 }
 
 Tensor Tensor::resize(int rowNum, int colNum, bool isNew) const {
@@ -200,4 +201,22 @@ Tensor Tensor::transpose(bool isNew) const {
 
 Tensor Tensor::dot(const Tensor &t) const {
 	return (*shared_ptr<Operator>(new DotOperator(*this, t)))();
+}
+
+void Tensor::info() const {
+	value->info();
+}
+
+void Tensor::cpu() {
+	value->cpu();
+	gradient->cpu();
+}
+
+void Tensor::cuda() {
+	value->cuda();
+	gradient->cuda();
+}
+
+bool Tensor::isCuda() const {
+	return value->isCuda();
 }

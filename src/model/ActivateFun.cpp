@@ -5,22 +5,13 @@
 #include "model/ActivateFun.h"
 
 Tensor sigmoid(const Tensor& t) {
-	return (t.exp().pow(-1)+1).pow(-1);
+	return (t.exp().pow(-1)+Tensor(1, t.isCuda())).pow(-1);
 }
 
 Tensor tanh(const Tensor& t) {
-	return sigmoid(t*2)*2-1;
+	return sigmoid(t*Tensor(2, t.isCuda()))*Tensor(2, t.isCuda())-Tensor(1, t.isCuda());
 }
 
 Tensor relu(const Tensor& t) {
-	Tensor tmp(t.row(), t.col());
-#pragma omp parallel
-	for (int i = 0; i < tmp.row(); ++i) {
-		for (int j = 0; j < tmp.col(); ++j) {
-			if (t(i, j) > 0) {
-				(*tmp)(i, j) = 1;
-			}
-		}
-	}
-	return t.dot(tmp);
+	return (*shared_ptr<Operator>(new ReluOperator(t)))();
 }

@@ -10,12 +10,12 @@
 
 class Linear {
 public:
-	Linear(Model& m, int inputNum, int outputNum, bool base=true);
+	Linear(Model& m, int inputNum, int outputNum, bool bias=true);
 	Tensor operator()(const Tensor& input);
 private:
-	bool isBase;
+	bool isBias;
 	Tensor weight;
-	Tensor base;
+	Tensor bias;
 };
 
 

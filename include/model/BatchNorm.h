@@ -15,7 +15,7 @@ public:
 private:
 	double eps;
 	Tensor weight;
-	Tensor base;
+	Tensor bias;
 };
 
 
