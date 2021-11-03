@@ -15,7 +15,7 @@
 
 Tensor::Tensor(double value) : op(nullptr), value(nullptr), gradient(nullptr), constant(true) {
 	this->value = std::make_shared<CuMatrix>(1, 1, false);
-	this->value->setValue(0, 0, value);
+	(**this->value)(0, 0) = value;
 	gradient = std::make_shared<CuMatrix>(1, 1, false);
 	gradient->setZero();
 }
@@ -33,7 +33,7 @@ Tensor::Tensor(const vector<vector<double>>& v, bool cuda) : op(nullptr), consta
 #pragma omp parallel for
 	for (int i = 0; i < v.size(); ++i) {
 		for (int j = 0; j < v[0].size(); ++j) {
-			value->setValue(i, j, v[i][j]);
+			(**value)(i, j) = v[i][j];
 		}
 	}
 	gradient = std::make_shared<CuMatrix>(v.size(), v[0].size(), false);

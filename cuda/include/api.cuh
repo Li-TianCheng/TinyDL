@@ -66,9 +66,6 @@ namespace cuda {
 	void setValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	              double num);
 
-	void setValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-	              int row, int col, double value);
-
 	double getValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 					int row, int col);
 

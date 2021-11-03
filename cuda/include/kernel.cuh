@@ -76,9 +76,6 @@ __global__ void kernelImgToConvBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>
 __global__ void kernelSetValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 							   double num);
 
-__global__ void kernelSetValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-                               int row, int col, double value);
-
 __global__ void kernelGetValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
                                int row, int col, double* r);
 

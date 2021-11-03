@@ -41,7 +41,6 @@ public:
 	bool isCuda() const;
 	void cuda();
 	void cpu();
-	void setValue(int row, int col, double value);
 	void resize(int row, int col);
 	CuMatrix operator+(const CuMatrix& c);
 	CuMatrix& operator+=(const CuMatrix& c);

@@ -176,14 +176,6 @@ Map<Matrix<double, Dynamic, Dynamic, RowMajor>> &CuMatrix::operator*() const {
 	return *matrix;
 }
 
-void CuMatrix::setValue(int row, int col, double value) {
-	if (data->cuda) {
-		cuda::setValue(*matrix, row, col, value);
-	} else {
-		(*matrix)(row, col) = value;
-	}
-}
-
 void CuMatrix::resize(int row, int col) {
 	if (row*col <= matrix->rows()*matrix->cols()) {
 		delete matrix;

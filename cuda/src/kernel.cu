@@ -245,11 +245,6 @@ __global__ void kernelSetValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m
 	}
 }
 
-__global__ void kernelSetValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-                               int row, int col, double value) {
-	m1(row, col) = value;
-}
-
 __global__ void kernelGetValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
                                int row, int col, double* r) {
 	*r = m1(row, col);

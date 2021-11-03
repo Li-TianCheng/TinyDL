@@ -17,9 +17,12 @@ Tensor MSELoss(Tensor& pred, Tensor& label) {
 Tensor crossEntropyLoss(Tensor& pred, Tensor& label) {
 	auto out = softmax(pred) + 1e-9;
 	pred.freeOperator();
-	Tensor l(pred.row(), pred.col(), pred.isCuda());
+	Tensor l(pred.row(), pred.col(), false);
 	for (int i = 0; i < label.col(); ++i) {
-		(*l).setValue(i, (int)label(0, i), -1);
+		(**l)(i, (int)label(0, i)) = -1;
+	}
+	if (label.isCuda()) {
+		l.cuda();
 	}
 	Tensor t1(1, pred.row(), pred.isCuda());
 	Tensor t2(pred.col(), 1, pred.isCuda());

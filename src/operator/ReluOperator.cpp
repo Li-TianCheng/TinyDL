@@ -17,7 +17,7 @@ Tensor ReluOperator::operator()() {
 		for (int i = 0; i < tensor1.row(); ++i) {
 			for (int j = 0; j < tensor1.col(); ++j) {
 				if ((*value)(i, j) < 0) {
-					(*value).setValue(i, j, 0);
+					(**value)(i, j) = 0;
 				}
 			}
 		}

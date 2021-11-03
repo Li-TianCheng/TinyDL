@@ -197,16 +197,6 @@ void cuda::setValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	}
 }
 
-void cuda::setValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-              int row, int col, double value) {
-	kernelSetValue<<<1, 1>>>(m1, row, col, value);
-	cudaDeviceSynchronize();
-	cudaError_t cudaStatus = cudaGetLastError();
-	if (cudaStatus != cudaSuccess) {
-		fprintf(stderr, "kernelSetValue launch failed:%s\n", cudaGetErrorString(cudaStatus));
-	}
-}
-
 double cuda::getValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
                 int row, int col) {
 	double* r;
