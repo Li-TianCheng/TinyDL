@@ -5,11 +5,11 @@
 #include "model/ActivateFun.h"
 
 Tensor sigmoid(const Tensor& t) {
-	return (t.exp().pow(-1)+Tensor(1, t.isCuda())).pow(-1);
+	return (t.exp().pow(-1)+1).pow(-1);
 }
 
 Tensor tanh(const Tensor& t) {
-	return sigmoid(t*Tensor(2, t.isCuda()))*Tensor(2, t.isCuda())-Tensor(1, t.isCuda());
+	return sigmoid(t*2)*2-1;
 }
 
 Tensor relu(const Tensor& t) {

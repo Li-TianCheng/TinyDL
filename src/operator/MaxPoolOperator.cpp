@@ -5,7 +5,7 @@
 #include "operator/MaxPoolOperator.h"
 
 MaxPoolOperator::MaxPoolOperator(const Tensor &tensor1, int channel, int dataRow, int dataCol, int kernelRow, int kernelCol,
-                                     int stride) : Operator(tensor1, Tensor(0, tensor1.isCuda())), channel(channel), dataRow(dataRow), dataCol(dataCol),
+                                     int stride) : Operator(tensor1, 0), channel(channel), dataRow(dataRow), dataCol(dataCol),
                                                    kernelRow(kernelRow), kernelCol(kernelCol), stride(stride){
 
 }

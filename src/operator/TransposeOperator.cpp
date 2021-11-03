@@ -4,7 +4,7 @@
 
 #include "operator/TransposeOperator.h"
 
-TransposeOperator::TransposeOperator(const Tensor &tensor1, bool isNew) : Operator(tensor1, Tensor(0, tensor1.isCuda())), isNew(isNew) {
+TransposeOperator::TransposeOperator(const Tensor &tensor1, bool isNew) : Operator(tensor1, 0), isNew(isNew) {
 
 }
 

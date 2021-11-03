@@ -6,7 +6,7 @@
 #include "operator/MaxPoolOperator.h"
 
 Tensor softmax(const Tensor& t) {
-	auto out = t - Tensor((*t).max(), t.isCuda());
+	auto out = t - (*t).max();
 	Tensor tmp(t.col(), t.col(), t.isCuda());
 	tmp.setOnes();
 	return out.exp().dot((out.exp() * tmp).pow(-1));

@@ -4,7 +4,7 @@
 
 #include "operator/ConvToImgOperator.h"
 
-ConvToImgOperator::ConvToImgOperator(const Tensor &tensor1, int num) : Operator(tensor1, Tensor(0, tensor1.isCuda())), num(num) {
+ConvToImgOperator::ConvToImgOperator(const Tensor &tensor1, int num) : Operator(tensor1, 0), num(num) {
 
 }
 

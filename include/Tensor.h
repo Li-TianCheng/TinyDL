@@ -16,9 +16,9 @@ class Operator;
 
 class Tensor {
 public:
-	explicit Tensor(double value, bool cuda);
-	Tensor(int rowNum, int colNum, bool cuda);
-	explicit Tensor(const vector<vector<double>>& v, bool cuda);
+	Tensor(double value);
+	Tensor(int rowNum, int colNum, bool cuda=false);
+	explicit Tensor(const vector<vector<double>>& v, bool cuda=false);
 	explicit Tensor(const CuMatrix& value);
 	Tensor(shared_ptr<CuMatrix> value, shared_ptr<Operator> op);
 	Tensor(const Tensor& t) = default;

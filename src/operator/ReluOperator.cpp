@@ -4,7 +4,7 @@
 
 #include "operator/ReluOperator.h"
 
-ReluOperator::ReluOperator(const Tensor &tensor1) : Operator(tensor1, Tensor(0, tensor1.isCuda())) {
+ReluOperator::ReluOperator(const Tensor &tensor1) : Operator(tensor1, 0) {
 
 }
 

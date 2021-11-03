@@ -4,7 +4,7 @@
 
 #include "operator/ResizeOperator.h"
 
-ResizeOperator::ResizeOperator(const Tensor &tensor1, int rowNum, int colNum, bool isNew) : Operator(tensor1, Tensor(0, tensor1.isCuda())), rowNum(rowNum), colNum(colNum), isNew(isNew) {
+ResizeOperator::ResizeOperator(const Tensor &tensor1, int rowNum, int colNum, bool isNew) : Operator(tensor1, 0), rowNum(rowNum), colNum(colNum), isNew(isNew) {
 
 }
 

@@ -13,10 +13,10 @@
 #include "operator/TransposeOperator.h"
 #include "operator/DotOperator.h"
 
-Tensor::Tensor(double value, bool cuda) : op(nullptr), value(nullptr), gradient(nullptr), constant(true) {
-	this->value = std::make_shared<CuMatrix>(1, 1, cuda);
+Tensor::Tensor(double value) : op(nullptr), value(nullptr), gradient(nullptr), constant(true) {
+	this->value = std::make_shared<CuMatrix>(1, 1, false);
 	this->value->setValue(0, 0, value);
-	gradient = std::make_shared<CuMatrix>(1, 1, cuda);
+	gradient = std::make_shared<CuMatrix>(1, 1, false);
 	gradient->setZero();
 }
 
@@ -28,7 +28,7 @@ Tensor::Tensor(int rowNum, int colNum, bool cuda) : op(nullptr), constant(false)
 }
 
 Tensor::Tensor(const vector<vector<double>>& v, bool cuda) : op(nullptr), constant(false) {
-	value = std::make_shared<CuMatrix>(v.size(), v[0].size(), cuda);
+	value = std::make_shared<CuMatrix>(v.size(), v[0].size(), false);
 	value->setZero();
 #pragma omp parallel for
 	for (int i = 0; i < v.size(); ++i) {
@@ -36,8 +36,12 @@ Tensor::Tensor(const vector<vector<double>>& v, bool cuda) : op(nullptr), consta
 			value->setValue(i, j, v[i][j]);
 		}
 	}
-	gradient = std::make_shared<CuMatrix>(v.size(), v[0].size(), cuda);
+	gradient = std::make_shared<CuMatrix>(v.size(), v[0].size(), false);
 	gradient->setZero();
+	if (cuda) {
+		value->cuda();
+		gradient->cuda();
+	}
 }
 
 Tensor::Tensor(const CuMatrix& value) : op(nullptr), constant(false) {
@@ -131,7 +135,7 @@ Tensor &Tensor::operator+=(const Tensor &t) {
 }
 
 Tensor &Tensor::operator++() {
-	*this = *this + Tensor(1, isCuda());
+	*this = *this + 1;
 	return *this;
 }
 
@@ -151,7 +155,7 @@ Tensor &Tensor::operator-=(const Tensor &t) {
 }
 
 Tensor &Tensor::operator--() {
-	*this = *this - Tensor(1, isCuda());
+	*this = *this - 1;
 	return *this;
 }
 
@@ -180,15 +184,15 @@ Tensor &Tensor::operator/=(const Tensor &t) {
 }
 
 Tensor Tensor::log(double t) const {
-	return (*shared_ptr<Operator>(new LogOperator(Tensor(t, isCuda()), *this)))();
+	return (*shared_ptr<Operator>(new LogOperator(t, *this)))();
 }
 
 Tensor Tensor::pow(double t) const {
-	return (*shared_ptr<Operator>(new PowOperator(*this, Tensor(t, isCuda()))))();
+	return (*shared_ptr<Operator>(new PowOperator(*this, t)))();
 }
 
 Tensor Tensor::exp() const{
-	return (*shared_ptr<Operator>(new PowOperator(Tensor(1.0, isCuda()), *this)))();
+	return (*shared_ptr<Operator>(new PowOperator(1.0, *this)))();
 }
 
 Tensor Tensor::resize(int rowNum, int colNum, bool isNew) const {
