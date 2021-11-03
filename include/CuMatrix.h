@@ -8,6 +8,7 @@
 #include <iostream>
 #include <memory>
 #include "../cuda/include/api.cuh"
+#include "MemPool.h"
 
 #define EIGEN_USE_MKL_ALL
 #define EIGEN_VECTORIZE_SSE4_2
@@ -17,14 +18,13 @@ using std::static_pointer_cast;
 
 struct Data {
 	bool cuda;
-	double* ptr;
-	explicit Data(bool cuda) : cuda(cuda) {}
+	size_t size;
+	memObj* ptr;
+	Data(size_t size, bool cuda) : size(size), cuda(cuda) {
+		ptr = memPool.allocate(size, cuda);
+	}
 	~Data() {
-		if (cuda) {
-			cudaFree(ptr);
-		} else {
-			free(ptr);
-		}
+		memPool.free(ptr, size, cuda);
 	}
 };
 

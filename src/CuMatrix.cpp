@@ -4,53 +4,44 @@
 
 #include "CuMatrix.h"
 CuMatrix::CuMatrix(int row, int col, bool cuda) {
-	data = shared_ptr<Data>(new Data(cuda));
-	if (cuda) {
-		cudaMalloc((void**)&(data->ptr), row * col * sizeof(double));
-	} else {
-		data->ptr = (double*)malloc(row * col * sizeof(double));
-	}
-	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(data->ptr, row, col);
+	data = shared_ptr<Data>(new Data(row * col * sizeof(double), cuda));
+	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>((double*)data->ptr->ptr, row, col);
 }
 
 CuMatrix::CuMatrix(int row, int col, shared_ptr<Data> data) : data(data) {
-	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(data->ptr, row, col);
+	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>((double*)data->ptr->ptr, row, col);
 }
 
 CuMatrix::CuMatrix(const CuMatrix& c) {
-	data = shared_ptr<Data>(new Data(c.data->cuda));
+	data = shared_ptr<Data>(new Data((*c).rows() * (*c).cols() * sizeof(double), c.data->cuda));
 	if (c.data->cuda) {
-		cudaMalloc((void**)&(data->ptr), (*c).rows() * (*c).cols() * sizeof(double));
-		cudaMemcpy(data->ptr, c.data->ptr, (*c).rows() * (*c).cols() * sizeof(double), cudaMemcpyDeviceToDevice);
+		cudaMemcpy(data->ptr->ptr, c.data->ptr->ptr, (*c).rows() * (*c).cols() * sizeof(double), cudaMemcpyDeviceToDevice);
 	} else {
-		data->ptr = (double*)malloc((*c).rows() * (*c).cols() * sizeof(double));
-		memcpy(data->ptr, c.data->ptr, (*c).rows() * (*c).cols() * sizeof(double));
+		memcpy(data->ptr->ptr, c.data->ptr->ptr, (*c).rows() * (*c).cols() * sizeof(double));
 	}
-	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(data->ptr, (*c).rows(), (*c).cols());
+	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>((double*)data->ptr->ptr, (*c).rows(), (*c).cols());
 }
 
 CuMatrix::CuMatrix(CuMatrix &&c) noexcept : data(c.data) {
-	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(data->ptr, (*c).rows(), (*c).cols());
+	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>((double*)data->ptr->ptr, (*c).rows(), (*c).cols());
 }
 
 CuMatrix &CuMatrix::operator=(const CuMatrix& c) {
-	data = shared_ptr<Data>(new Data(c.data->cuda));
+	data = shared_ptr<Data>(new Data((*c).rows() * (*c).cols() * sizeof(double), c.data->cuda));
 	if (c.data->cuda) {
-		cudaMalloc((void**)&(data->ptr), (*c).rows() * (*c).cols() * sizeof(double));
-		cudaMemcpy(data->ptr, c.data->ptr, (*c).rows() * (*c).cols() * sizeof(double), cudaMemcpyDeviceToDevice);
+		cudaMemcpy(data->ptr->ptr, c.data->ptr->ptr, (*c).rows() * (*c).cols() * sizeof(double), cudaMemcpyDeviceToDevice);
 	} else {
-		data->ptr = (double*)malloc((*c).rows() * (*c).cols() * sizeof(double));
-		memcpy(data->ptr, c.data->ptr, (*c).rows() * (*c).cols() * sizeof(double));
+		memcpy(data->ptr->ptr, c.data->ptr->ptr, (*c).rows() * (*c).cols() * sizeof(double));
 	}
 	delete matrix;
-	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(data->ptr, (*c).rows(), (*c).cols());
+	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>((double*)data->ptr->ptr, (*c).rows(), (*c).cols());
 	return *this;
 }
 
 CuMatrix &CuMatrix::operator=(CuMatrix&& c) noexcept {
 	data = c.data;
 	delete matrix;
-	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(data->ptr, (*c).rows(), (*c).cols());
+	matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>((double*)data->ptr->ptr, (*c).rows(), (*c).cols());
 	return *this;
 }
 
@@ -65,11 +56,10 @@ bool CuMatrix::isCuda() const {
 void CuMatrix::cuda() {
 	if (!data->cuda) {
 		auto tmp = data;
-		data = shared_ptr<Data>(new Data(true));
-		cudaMalloc((void**)&(data->ptr), matrix->rows() * matrix->cols() * sizeof(double));
-		cudaMemcpy(data->ptr, tmp->ptr, matrix->rows() * matrix->cols() * sizeof(double), cudaMemcpyHostToDevice);
+		data = shared_ptr<Data>(new Data(matrix->rows() * matrix->cols() * sizeof(double), true));
+		cudaMemcpy(data->ptr->ptr, tmp->ptr->ptr, matrix->rows() * matrix->cols() * sizeof(double), cudaMemcpyHostToDevice);
 		auto prev = matrix;
-		matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(data->ptr, prev->rows(), prev->cols());
+		matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>((double*)data->ptr->ptr, prev->rows(), prev->cols());
 		delete prev;
 	}
 }
@@ -77,11 +67,10 @@ void CuMatrix::cuda() {
 void CuMatrix::cpu() {
 	if (data->cuda) {
 		auto tmp = data;
-		data = shared_ptr<Data>(new Data(false));
-		data->ptr = (double*)malloc(matrix->rows() * matrix->cols() * sizeof(double));
-		cudaMemcpy(data->ptr, tmp->ptr, matrix->rows() * matrix->cols() * sizeof(double), cudaMemcpyDeviceToHost);
+		data = shared_ptr<Data>(new Data(matrix->rows() * matrix->cols() * sizeof(double), false));
+		cudaMemcpy(data->ptr->ptr, tmp->ptr->ptr, matrix->rows() * matrix->cols() * sizeof(double), cudaMemcpyDeviceToHost);
 		auto prev = matrix;
-		matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(data->ptr, prev->rows(), prev->cols());
+		matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>((double*)data->ptr->ptr, prev->rows(), prev->cols());
 		delete prev;
 	}
 }
@@ -179,19 +168,17 @@ Map<Matrix<double, Dynamic, Dynamic, RowMajor>> &CuMatrix::operator*() const {
 void CuMatrix::resize(int row, int col) {
 	if (row*col <= matrix->rows()*matrix->cols()) {
 		delete matrix;
-		matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(data->ptr, row, col);
+		matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>((double*)data->ptr->ptr, row, col);
 	} else {
 		auto prev = matrix;
 		auto tmp = data;
-		data = shared_ptr<Data>(new Data(tmp->cuda));
+		data = shared_ptr<Data>(new Data(row * col * sizeof(double), tmp->cuda));
 		if (tmp->cuda) {
-			cudaMalloc((void**)&(data->ptr), row * col * sizeof(double));
-			cudaMemcpy(data->ptr, tmp->ptr, prev->rows()*prev->cols() * sizeof(double), cudaMemcpyDeviceToDevice);
+			cudaMemcpy(data->ptr->ptr, tmp->ptr->ptr, prev->rows()*prev->cols() * sizeof(double), cudaMemcpyDeviceToDevice);
 		} else {
-			data->ptr = (double*)malloc(row * col * sizeof(double));
-			memcpy(data->ptr, tmp->ptr, prev->rows()*prev->cols() * sizeof(double));
+			memcpy(data->ptr->ptr, tmp->ptr->ptr, prev->rows()*prev->cols() * sizeof(double));
 		}
-		matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(data->ptr, row, col);
+		matrix = new Map<Matrix<double, Dynamic, Dynamic, RowMajor>>((double*)data->ptr->ptr, row, col);
 		delete prev;
 	}
 }
