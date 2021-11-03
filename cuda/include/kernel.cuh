@@ -41,7 +41,7 @@ __global__ void kernelLog(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 						  Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r);
 
 __global__ void kernelMaxPool(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-							  int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
+							  int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
 							  Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r);
 
 __global__ void kernelMaxPoolBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,

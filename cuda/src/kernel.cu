@@ -94,21 +94,25 @@ __global__ void kernelLog(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 }
 
 __global__ void kernelMaxPool(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-                              int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
+                              int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
                               Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
-	int x = threadIdx.x / dataCol;
-	int y = threadIdx.x % dataCol;
-	for (int k = 0; k < kernelRow*kernelCol; ++k) {
-		int kx = k / kernelCol;
-		int ky = k % kernelCol;
-		int kx0 = x - kx;
-		int ky0 = y - ky;
-		if (kx0 >= 0 && ky0 >= 0 && kx0 <= dataRow-kernelRow && ky0 <= dataCol-kernelCol && kx0 % stride == 0 && ky0 % stride == 0) {
-			int n = kx0 / stride * ((dataRow-kernelRow)/stride+1) + ky0 / stride;
-			for (int c = 0; c < channel; ++c) {
-				r(blockIdx.x, n+c*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)) = max(r(blockIdx.x, n+c*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)), m1(blockIdx.x, threadIdx.x+c*dataRow*dataCol));
+	int i = blockIdx.x;
+	int j = blockIdx.y * blockDim.y + threadIdx.x;
+	if (j < ((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)) {
+		int kx = j / ((dataCol-kernelCol)/stride+1);
+		int ky = j % ((dataCol-kernelCol)/stride+1);
+		int x0 = kx*stride;
+		int y0 = ky*stride;
+		double value = DBL_MIN;
+		for (int m = 0; m < kernelRow; ++m) {
+			for (int n = 0; n < kernelCol; ++n) {
+				int x = x0 + m;
+				int y = y0 + n;
+				int idx = x*dataCol+y+blockIdx.z*dataRow*dataCol;
+				value = max(value, m1(i, idx));
 			}
 		}
+		r(i, j+blockIdx.z*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)) = value;
 	}
 }
 

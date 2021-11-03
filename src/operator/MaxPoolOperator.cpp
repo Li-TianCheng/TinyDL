@@ -16,21 +16,24 @@ Tensor MaxPoolOperator::operator()() {
 		cuda::maxPool(**tensor1, channel, dataRow, dataCol, kernelRow, kernelCol, stride, **value);
 	} else {
 #pragma omp parallel for collapse(2)
-		for (int i = 0; i < tensor1.row(); ++i) {
-			for (int j = 0; j < dataRow*dataCol; ++j) {
-				int x = j / dataCol;
-				int y = j % dataCol;
-				for (int k = 0; k < kernelRow*kernelCol; ++k) {
-					int kx = k / kernelCol;
-					int ky = k % kernelCol;
-					int kx0 = x - kx;
-					int ky0 = y - ky;
-					if (kx0 >= 0 && ky0 >= 0 && kx0 <= dataRow-kernelRow && ky0 <= dataCol-kernelCol && kx0 % stride == 0 && ky0 % stride == 0) {
-						int n = kx0 / stride * ((dataRow-kernelRow)/stride+1) + ky0 / stride;
-						for (int c = 0; c < channel; ++c) {
-							(**value)(i, n+c*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)) = std::max((*value)(i, n+c*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)), tensor1(i, j+c*dataRow*dataCol));
+		for (int i = 0; i < (**value).rows(); ++i) {
+			for (int j = 0; j < ((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1); ++j) {
+				int kx = j / ((dataCol-kernelCol)/stride+1);
+				int ky = j % ((dataCol-kernelCol)/stride+1);
+				int x0 = kx*stride;
+				int y0 = ky*stride;
+#pragma omp parallel for
+				for (int c = 0; c < channel; ++c) {
+					double val = DBL_MIN;
+					for (int m = 0; m < kernelRow; ++m) {
+						for (int n = 0; n < kernelCol; ++n) {
+							int x = x0 + m;
+							int y = y0 + n;
+							int idx = x*dataCol+y+c*dataRow*dataCol;
+							val = std::max(val, (**tensor1)(i, idx));
 						}
 					}
+					(**value)(i, j+c*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)) = val;
 				}
 			}
 		}

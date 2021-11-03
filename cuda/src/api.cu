@@ -83,7 +83,9 @@ void cuda::log(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 void cuda::maxPool(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
              int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
              Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
-	kernelMaxPool<<<m1.rows(), dataRow*dataCol>>>(m1, channel, dataRow, dataCol, kernelRow, kernelCol, stride, r);
+	dim3 grid(r.rows(), ((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)/BLOCK_SIZE/BLOCK_SIZE+1, channel);
+	dim3 block(BLOCK_SIZE*BLOCK_SIZE);
+	kernelMaxPool<<<grid, block>>>(m1, dataRow, dataCol, kernelRow, kernelCol, stride, r);
 	cudaDeviceSynchronize();
 	cudaError_t cudaStatus = cudaGetLastError();
 	if (cudaStatus != cudaSuccess) {
