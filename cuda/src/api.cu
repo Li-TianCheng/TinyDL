@@ -10,6 +10,10 @@ void cuda::add(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelAdd<<<grid, block>>>(m1, m2, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelAdd launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::sub(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -19,6 +23,10 @@ void cuda::sub(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelSub<<<grid, block>>>(m1, m2, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelSub launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::mul(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -28,6 +36,10 @@ void cuda::mul(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE/CALCULATE_NUM, BLOCK_SIZE);
 	kernelMul<<<grid, block>>>(m1, m2, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelMul launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::numMul(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -37,6 +49,10 @@ void cuda::numMul(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelNumMul<<<grid, block>>>(m1, num, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelNumMul launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::dot(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -46,6 +62,10 @@ void cuda::dot(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelDot<<<grid, block>>>(m1, m2, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelDot launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::log(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -54,6 +74,10 @@ void cuda::log(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelLog<<<grid, block>>>(m1, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelLog launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::maxPool(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -61,6 +85,10 @@ void cuda::maxPool(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
              Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
 	kernelMaxPool<<<m1.rows(), dataRow*dataCol>>>(m1, channel, dataRow, dataCol, kernelRow, kernelCol, stride, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelMaxPool launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::maxPoolBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -68,8 +96,14 @@ void cuda::maxPoolBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 					 int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
                      Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m3,
 					 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
-	kernelMaxPoolBp<<<m1.rows(), dataRow*dataCol>>>(m1, m2, channel, dataRow, dataCol, kernelRow, kernelCol, stride, m3, r);
+	dim3 grid(m1.rows(), (dataRow*dataCol-1)/BLOCK_SIZE/BLOCK_SIZE+1, channel);
+	dim3 block(BLOCK_SIZE*BLOCK_SIZE);
+	kernelMaxPoolBp<<<grid, block>>>(m1, m2, dataRow, dataCol, kernelRow, kernelCol, stride, m3, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelMaxPoolBp launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::exp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -78,6 +112,10 @@ void cuda::exp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelExp<<<grid, block>>>(m1, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelExp launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::pow(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -87,6 +125,10 @@ void cuda::pow(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelPow<<<grid, block>>>(m1, num, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelPow launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::convToImg(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -96,6 +138,10 @@ void cuda::convToImg(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelConvToImg<<<grid, block>>>(m1, num, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelConvToImg launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::convToImgBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -105,20 +151,36 @@ void cuda::convToImgBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelConvToImgBp<<<grid, block>>>(m1, num, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelConvToImgBp launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::imgToConv(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
                int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
                Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
-	kernelImgToConv<<<m1.rows(), dataRow*dataCol>>>(m1, channel, dataRow, dataCol, kernelRow, kernelCol, stride, r);
+	dim3 grid(m1.rows(), (dataRow*dataCol-1)/BLOCK_SIZE/BLOCK_SIZE+1, channel);
+	dim3 block(BLOCK_SIZE*BLOCK_SIZE);
+	kernelImgToConv<<<grid, block>>>(m1, dataRow, dataCol, kernelRow, kernelCol, stride, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelImgToConv launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::imgToConvBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
                  int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
                  Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
-	kernelImgToConvBp<<<r.rows(), dataRow*dataCol>>>(m1, channel, dataRow, dataCol, kernelRow, kernelCol, stride, r);
+	dim3 grid(r.rows(), (dataRow*dataCol-1)/BLOCK_SIZE/BLOCK_SIZE+1, channel);
+	dim3 block(BLOCK_SIZE*BLOCK_SIZE);
+	kernelImgToConvBp<<<grid, block>>>(m1, dataRow, dataCol, kernelRow, kernelCol, stride, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelImgToConvBp launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::setValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -127,12 +189,20 @@ void cuda::setValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelSetValue<<<grid, block>>>(m1, num);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelSetValue launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::setValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
               int row, int col, double value) {
 	kernelSetValue<<<1, 1>>>(m1, row, col, value);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelSetValue launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 double cuda::getValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -142,6 +212,10 @@ double cuda::getValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	cudaMalloc((void**)&r, sizeof(double));
 	kernelGetValue<<<1, 1>>>(m1, row, col, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelGetValue launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 	cudaMemcpy(&result, r, sizeof(double), cudaMemcpyDeviceToHost);
 	cudaFree(r);
 	return result;
@@ -150,6 +224,10 @@ double cuda::getValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 void cuda::info(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1) {
 	kernelInfo<<<1, 1>>>(m1);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelInfo launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::transpose(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -158,6 +236,10 @@ void cuda::transpose(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelTranspose<<<grid, block>>>(m1, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelTranspose launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 double cuda::max(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1) {
@@ -167,6 +249,10 @@ double cuda::max(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1) {
 	cudaMalloc((void**)&r, grid.x*grid.y*sizeof(double));
 	kernelMax<<<grid, block>>>(m1, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelMax launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 	double tmp[grid.x*grid.y];
 	cudaMemcpy(tmp, r, grid.x*grid.y*sizeof(double), cudaMemcpyDeviceToHost);
 	cudaFree(r);
@@ -184,6 +270,10 @@ double cuda::min(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1) {
 	cudaMalloc((void**)&r, grid.x*grid.y*sizeof(double));
 	kernelMin<<<grid, block>>>(m1, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelMin launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 	double tmp[grid.x*grid.y];
 	cudaMemcpy(tmp, r, grid.x*grid.y*sizeof(double), cudaMemcpyDeviceToHost);
 	cudaFree(r);
@@ -199,6 +289,10 @@ void cuda::relu(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1) {
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelRelu<<<grid, block>>>(m1);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelRelu launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }
 
 void cuda::reluBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
@@ -208,4 +302,8 @@ void cuda::reluBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	kernelReluBp<<<grid, block>>>(m1, m2, r);
 	cudaDeviceSynchronize();
+	cudaError_t cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "kernelReluBp launch failed:%s\n", cudaGetErrorString(cudaStatus));
+	}
 }

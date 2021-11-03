@@ -46,7 +46,7 @@ __global__ void kernelMaxPool(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1
 
 __global__ void kernelMaxPoolBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
                                 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m2,
-                                int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
+                                int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
                                 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m3,
                                 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r);
 
@@ -66,11 +66,11 @@ __global__ void kernelConvToImgBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>
                                 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r);
 
 __global__ void kernelImgToConv(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-                                int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
+                                int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
                                 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r);
 
 __global__ void kernelImgToConvBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-                                int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
+                                int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
                                 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r);
 
 __global__ void kernelSetValue(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,

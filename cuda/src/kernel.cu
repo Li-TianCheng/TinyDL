@@ -114,24 +114,29 @@ __global__ void kernelMaxPool(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1
 
 __global__ void kernelMaxPoolBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
                                 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m2,
-                                int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
+                                int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
                                 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m3,
                                 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
-	int x = threadIdx.x / dataCol;
-	int y = threadIdx.x % dataCol;
-	for (int k = 0; k < kernelRow*kernelCol; ++k) {
-		int kx = k / kernelCol;
-		int ky = k % kernelCol;
-		int kx0 = x - kx;
-		int ky0 = y - ky;
-		if (kx0 >= 0 && ky0 >= 0 && kx0 <= dataRow-kernelRow && ky0 <= dataCol-kernelCol && kx0 % stride == 0 && ky0 % stride == 0) {
-			int n = kx0 / stride * ((dataRow-kernelRow)/stride+1) + ky0 / stride;
-			for (int c = 0; c < channel; ++c) {
-				if (m2(blockIdx.x, n+c*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)) == m1(blockIdx.x, threadIdx.x+c*dataRow*dataCol)) {
-					r(blockIdx.x, threadIdx.x+c*dataRow*dataCol) += m3(blockIdx.x, n+c*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1));
+	int i = blockIdx.x;
+	int j = blockIdx.y * blockDim.y + threadIdx.x;
+	if (j < dataRow*dataCol) {
+		int x = j / dataCol;
+		int y = j % dataCol;
+		double value = r(i, j+blockIdx.z*dataRow*dataCol);
+		double max = m1(i, j+blockIdx.z*dataRow*dataCol);
+		for (int k = 0; k < kernelRow*kernelCol; ++k) {
+			int kx = k / kernelCol;
+			int ky = k % kernelCol;
+			int kx0 = x - kx;
+			int ky0 = y - ky;
+			if (kx0 >= 0 && ky0 >= 0 && kx0 <= dataRow-kernelRow && ky0 <= dataCol-kernelCol && kx0 % stride == 0 && ky0 % stride == 0) {
+				int n = kx0 / stride * ((dataRow-kernelRow)/stride+1) + ky0 / stride;
+				if (m2(i, n+blockIdx.z*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)) == max) {
+					value += m3(i, n+blockIdx.z*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1));
 				}
 			}
 		}
+		r(i, j+blockIdx.z*dataRow*dataCol) = value;
 	}
 }
 
@@ -175,40 +180,47 @@ __global__ void kernelConvToImgBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>
 }
 
 __global__ void kernelImgToConv(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-                                int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
+                                int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
                                 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
-	int x = threadIdx.x / dataCol;
-	int y = threadIdx.x % dataCol;
-	for (int k = 0; k < kernelRow*kernelCol; ++k) {
-		int kx = k / kernelCol;
-		int ky = k % kernelCol;
-		int kx0 = x - kx;
-		int ky0 = y - ky;
-		if (kx0 >= 0 && ky0 >= 0 && kx0 <= dataRow-kernelRow && ky0 <= dataCol-kernelCol && kx0 % stride == 0 && ky0 % stride == 0) {
-			int n = kx0 / stride * ((dataRow-kernelRow)/stride+1) + ky0 / stride;
-			for (int c = 0; c < channel; ++c) {
-				r(blockIdx.x*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)+n, k+c*kernelRow*kernelCol) = m1(blockIdx.x, threadIdx.x+c*dataRow*dataCol);
+	int i = blockIdx.x;
+	int j = blockIdx.y * blockDim.y + threadIdx.x;
+	if (j < dataRow*dataCol) {
+		int x = j / dataCol;
+		int y = j % dataCol;
+		double value = m1(i, j+blockIdx.z*dataRow*dataCol);
+		for (int k = 0; k < kernelRow*kernelCol; ++k) {
+			int kx = k / kernelCol;
+			int ky = k % kernelCol;
+			int kx0 = x - kx;
+			int ky0 = y - ky;
+			if (kx0 >= 0 && ky0 >= 0 && kx0 <= dataRow-kernelRow && ky0 <= dataCol-kernelCol && kx0 % stride == 0 && ky0 % stride == 0) {
+				int n = kx0 / stride * ((dataRow - kernelRow) / stride + 1) + ky0 / stride;
+				r(i*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)+n, k+blockIdx.z*kernelRow*kernelCol) = value;
 			}
 		}
 	}
 }
 
 __global__ void kernelImgToConvBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-                                  int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
+                                  int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
                                   Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
-	int x = threadIdx.x / dataCol;
-	int y = threadIdx.x % dataCol;
-	for (int k = 0; k < kernelRow*kernelCol; ++k) {
-		int kx = k / kernelCol;
-		int ky = k % kernelCol;
-		int kx0 = x - kx;
-		int ky0 = y - ky;
-		if (kx0 >= 0 && ky0 >= 0 && kx0 <= dataRow-kernelRow && ky0 <= dataCol-kernelCol && kx0 % stride == 0 && ky0 % stride == 0) {
-			int n = kx0 / stride * ((dataRow-kernelRow)/stride+1) + ky0 / stride;
-			for (int c = 0; c < channel; ++c) {
-				r(blockIdx.x, threadIdx.x+c*dataRow*dataCol) += m1(blockIdx.x*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)+n, k+c*kernelRow*kernelCol);
+	int i = blockIdx.x;
+	int j = blockIdx.y * blockDim.y + threadIdx.x;
+	if (j < dataRow*dataCol) {
+		int x = j / dataCol;
+		int y = j % dataCol;
+		double value = r(i, j+blockIdx.z*dataCol*dataRow);
+		for (int k = 0; k < kernelRow*kernelCol; ++k) {
+			int kx = k / kernelCol;
+			int ky = k % kernelCol;
+			int kx0 = x - kx;
+			int ky0 = y - ky;
+			if (kx0 >= 0 && ky0 >= 0 && kx0 <= dataRow-kernelRow && ky0 <= dataCol-kernelCol && kx0 % stride == 0 && ky0 % stride == 0) {
+				int n = kx0 / stride * ((dataRow-kernelRow)/stride+1) + ky0 / stride;
+				value += m1(blockIdx.x*((dataRow-kernelRow)/stride+1)*((dataCol-kernelCol)/stride+1)+n, k+blockIdx.z*kernelRow*kernelCol);
 			}
 		}
+		r(i, j+blockIdx.z*dataCol*dataRow) = value;
 	}
 }
 
