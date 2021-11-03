@@ -35,8 +35,10 @@ namespace cuda {
 	             Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r);
 
 	void maxPoolBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-	             int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
-	             Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r);
+	               Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m2,
+				   int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
+	               Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m3,
+				   Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r);
 
 	void exp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 	         Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r);

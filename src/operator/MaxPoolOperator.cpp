@@ -39,8 +39,8 @@ Tensor MaxPoolOperator::operator()() {
 }
 
 void MaxPoolOperator::backward(Tensor &result) {
-	if (tensor1.isCuda()) {
-		cuda::maxPoolBp(*result.grad(), channel, dataRow, dataCol, kernelRow, kernelCol, stride, *tensor1.grad());
+	if (tensor1.grad().isCuda()) {
+		cuda::maxPoolBp(**tensor1, **result, channel, dataRow, dataCol, kernelRow, kernelCol, stride, *result.grad(), *tensor1.grad());
 	} else {
 #pragma omp parallel for collapse(2)
 		for (int i = 0; i < tensor1.row(); ++i) {

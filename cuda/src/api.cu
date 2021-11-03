@@ -64,9 +64,11 @@ void cuda::maxPool(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 }
 
 void cuda::maxPoolBp(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
-               int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
-               Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
-	kernelMaxPoolBp<<<r.rows(), dataRow*dataCol>>>(m1, channel, dataRow, dataCol, kernelRow, kernelCol, stride, r);
+                     Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m2,
+					 int channel, int dataRow, int dataCol, int kernelRow, int kernelCol, int stride,
+                     Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m3,
+					 Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
+	kernelMaxPoolBp<<<m1.rows(), dataRow*dataCol>>>(m1, m2, channel, dataRow, dataCol, kernelRow, kernelCol, stride, m3, r);
 	cudaDeviceSynchronize();
 }
 
