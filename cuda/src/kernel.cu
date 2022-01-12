@@ -26,40 +26,41 @@ __global__ void kernelSub(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
 __global__ void kernelMul(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
                           Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m2,
                           Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
-	int row = blockIdx.x * blockDim.x * CALCULATE_NUM + threadIdx.x;
-	int col = blockIdx.y * blockDim.y + threadIdx.y;
-	__shared__ double sharedM1[BLOCK_SIZE][BLOCK_SIZE];
-	__shared__ double sharedM2[BLOCK_SIZE][BLOCK_SIZE];
-	double re[CALCULATE_NUM] = {0};
-	int num = (m1.cols()-1) / BLOCK_SIZE + 1;
+	const unsigned int row = blockIdx.x * blockDim.x + threadIdx.x;
+	const unsigned int col = blockIdx.y * blockDim.y + threadIdx.y;
+	const unsigned int deltaX = blockDim.x * gridDim.x;
+	const unsigned int deltaY = blockDim.y * gridDim.y;
+	const unsigned int blockSize = BLOCK_SIZE/CALCULATE_NUM;
+	__shared__ double sharedM1[CALCULATE_NUM][blockSize][blockSize];
+	__shared__ double sharedM2[CALCULATE_NUM][blockSize][blockSize];
+	double re[CALCULATE_NUM][CALCULATE_NUM] = {0};
+	unsigned int num = (m1.cols()-1) / blockSize + 1;
 	for (int i = 0; i < num; ++i) {
-#pragma unroll 8
-		for (int t = 0; t < CALCULATE_NUM; ++t) {
-			double tmp = 0;
-			if (row+t*BLOCK_SIZE/CALCULATE_NUM < m1.rows() && i*BLOCK_SIZE+threadIdx.y < m1.cols()) {
-				tmp = m1(row+t*BLOCK_SIZE/CALCULATE_NUM, i*BLOCK_SIZE+threadIdx.y);
-			}
-			sharedM1[threadIdx.x+t*BLOCK_SIZE/CALCULATE_NUM][threadIdx.y] = tmp;
-			tmp = 0;
-			if (i*BLOCK_SIZE+threadIdx.x+t*BLOCK_SIZE/CALCULATE_NUM < m2.rows() && col < m2.cols()) {
-				tmp = m2(i*BLOCK_SIZE+threadIdx.x+t*BLOCK_SIZE/CALCULATE_NUM, col);
-			}
-			sharedM2[threadIdx.x+t*BLOCK_SIZE/CALCULATE_NUM][threadIdx.y] = tmp;
+		unsigned int y1 = threadIdx.y + i * blockSize;
+		unsigned int x2 = threadIdx.x + i * blockSize;
+		for (int j = 0; j < CALCULATE_NUM; ++j) {
+			unsigned int x1 = row + j * deltaX;
+			unsigned int y2 = col + j * deltaY;
+			sharedM1[j][threadIdx.x][threadIdx.y] = x1 < m1.rows() && y1 < m1.cols() ? m1(x1, y1) : 0;
+			sharedM2[j][threadIdx.x][threadIdx.y] = x2 < m2.rows() && y2 < m2.cols() ? m2(x2, y2) : 0;
 		}
 		__syncthreads();
-#pragma unroll 32
-		for (int j = 0; j < BLOCK_SIZE; ++j) {
-#pragma unroll 8
-			for (int t = 0; t < CALCULATE_NUM; ++t) {
-				re[t] += sharedM1[threadIdx.x+t*BLOCK_SIZE/CALCULATE_NUM][j] * sharedM2[j][threadIdx.y];
+		for (int j = 0; j < blockSize; ++j) {
+			for (int k = 0; k < CALCULATE_NUM; ++k) {
+				for (int l = 0; l < CALCULATE_NUM; ++l) {
+					re[k][l] += sharedM1[k][threadIdx.x][j] * sharedM2[l][j][threadIdx.y];
+				}
 			}
 		}
 		__syncthreads();
 	}
-#pragma unroll 8
-	for (int t = 0; t < CALCULATE_NUM; ++t) {
-		if (row+t*BLOCK_SIZE/CALCULATE_NUM < r.rows() && col < r.cols()) {
-			r(row+t*BLOCK_SIZE/CALCULATE_NUM, col) = re[t];
+	for (int i = 0; i < CALCULATE_NUM; ++i) {
+		unsigned int x = row + i * deltaX;
+		for (int j = 0; j < CALCULATE_NUM; ++j) {
+			unsigned int y = col + j * deltaY;
+			if (x < r.rows() && y < r.cols()) {
+				r(x, y) = re[i][j];
+			}
 		}
 	}
 }

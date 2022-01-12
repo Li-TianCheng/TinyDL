@@ -15,7 +15,7 @@ using Eigen::RowMajor;
 using Eigen::Dynamic;
 
 #define BLOCK_SIZE 32
-#define CALCULATE_NUM 8
+#define CALCULATE_NUM 4
 
 __global__ void kernelAdd(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
                           Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m2,

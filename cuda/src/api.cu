@@ -33,7 +33,7 @@ void cuda::mul(Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m1,
          Map<Matrix<double, Dynamic, Dynamic, RowMajor>> m2,
          Map<Matrix<double, Dynamic, Dynamic, RowMajor>> r) {
 	dim3 grid((r.rows()-1)/BLOCK_SIZE+1, (r.cols()-1)/BLOCK_SIZE+1);
-	dim3 block(BLOCK_SIZE/CALCULATE_NUM, BLOCK_SIZE);
+	dim3 block(BLOCK_SIZE/CALCULATE_NUM, BLOCK_SIZE/CALCULATE_NUM);
 	kernelMul<<<grid, block>>>(m1, m2, r);
 	cudaDeviceSynchronize();
 	cudaError_t cudaStatus = cudaGetLastError();
